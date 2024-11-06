@@ -34,39 +34,92 @@ async function generateSalesReport() {
 
     querySnapshot.forEach((doc) => {
         const data = doc.data();
-        console.log(data);  // Agregar console.log para ver los datos
         reportData.push(data);
         totalValue += data.valor;
     });
 
     const employeeEarnings = totalValue * (percentage / 100);
 
-    // Llamada a función para generar el PDF
-    createPDF('Reporte de Ventas', reportData, totalValue, employeeEarnings, percentage);
+    // Llamada a función para generar el PDF usando PDFMake
+    const docDefinition = {
+        content: [
+            { text: 'Reporte de Ventas', fontSize: 16, bold: true },
+            {
+                table: {
+                    body: [
+                        ['Fecha', 'Productos', 'Valor', 'Tipo de Pago', 'Cuenta'].map(text => ({ text, bold: true })),
+                        ...reportData.map(item => [
+                            item.fecha,
+                            item.productos || item['que se hara'],
+                            item.valor || '',
+                            item.t_pago || '',
+                            item.cuenta || ''
+                        ])
+                    ]
+                }
+            },
+            { text: `Total de Ventas: $${totalValue.toFixed(2)}`, bold: true },
+            { text: `Porcentaje para Empleado (${percentage}%): $${employeeEarnings.toFixed(2)}`, bold: true }
+        ]
+    };
+
+    pdfMake.createPdf(docDefinition).download('Reporte_de_Ventas.pdf');
 }
 
-// Función para crear un PDF
-function createPDF(title, data, totalValue = null, employeeEarnings = null, percentage = 0) {
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text(title, 10, 10);
-
-    let yPosition = 20;
-
-    data.forEach((item) => {
-        const itemText = `${item.fecha} - ${item.productos || item['que se hara']} - $${item.valor}`;
-        doc.text(itemText, 10, yPosition);
-        yPosition += 10;
-    });
-
-    if (totalValue !== null) {
-        doc.text(`Total Ventas: $${totalValue}`, 10, yPosition);
-        yPosition += 10;
-        doc.text(`Ganancias para el empleado (${percentage}%): $${employeeEarnings}`, 10, yPosition);
+// Función para generar reporte de citas en PDF
+async function generateAppointmentsReport() {
+    if (!startDateAppointments.value || !endDateAppointments.value) {
+        alert('Seleccione ambas fechas.');
+        return;
     }
 
-    doc.save('reporte_ventas.pdf');
+    const q = query(
+        collection(db, 'citas'),
+        where('fecha', '>=', startDateAppointments.value),
+        where('fecha', '<=', endDateAppointments.value)
+    );
+
+    const querySnapshot = await getDocs(q);
+    const reportData = [];
+
+    querySnapshot.forEach((doc) => {
+        reportData.push(doc.data());
+    });
+
+    // Llamada a función para generar el PDF
+    const docDefinition = {
+        content: [
+            { text: 'Reporte de Citas', fontSize: 16, bold: true },
+            {
+                table: {
+                    body: [
+                        ['Fecha', 'Que se hará', 'Asistió'].map(text => ({ text, bold: true })),
+                        ...reportData.map(item => [
+                            item.fecha,
+                            item['que se hara'],
+                            item.asistio ? 'Sí' : 'No'
+                        ])
+                    ]
+                }
+            }
+        ]
+    };
+
+    pdfMake.createPdf(docDefinition).download('Reporte_de_Citas.pdf');
 }
 
-// Asignar evento a generar reporte
+// Eventos de los botones
 generateSalesReportButton.addEventListener('click', generateSalesReport);
+generateAppointmentsReportButton.addEventListener('click', generateAppointmentsReport);
+
+backButton.addEventListener('click', () => {
+    window.location.href = 'menu.html';
+});
+
+logoutButton.addEventListener('click', () => {
+    signOut(auth).then(() => {
+        window.location.href = "index.html";
+    }).catch((error) => {
+        console.error("Error al cerrar sesión:", error);
+    });
+});
