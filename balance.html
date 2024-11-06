@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balance</title>
+    <link rel="stylesheet" href="css/balance.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="balance-container">
+        <h2>Balance</h2>
+        
+        <!-- Primer Cuadro: Reporte de Ventas -->
+        <div class="report-section">
+            <h3>Reporte de Ventas</h3>
+            <label for="start-date-sales">Fecha Desde:</label>
+            <input type="date" id="start-date-sales">
+            <label for="end-date-sales">Fecha Hasta:</label>
+            <input type="date" id="end-date-sales">
+            <label for="employee-percentage">Porcentaje para el empleado (%):</label>
+            <input type="number" id="employee-percentage" placeholder="25">
+            <button id="generate-sales-report">Generar Reporte</button>
+        </div>
+
+        <!-- Segundo Cuadro: Reporte de Citas -->
+        <div class="report-section">
+            <h3>Reporte de Citas</h3>
+            <label for="start-date-appointments">Fecha Desde:</label>
+            <input type="date" id="start-date-appointments">
+            <label for="end-date-appointments">Fecha Hasta:</label>
+            <input type="date" id="end-date-appointments">
+            <button id="generate-appointments-report">Generar Reporte</button>
+        </div>
+
+        <!-- Botones de navegación -->
+        <div class="navigation-buttons">
+            <button id="back">Atrás</button>
+            <button id="logout">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <script src="js/firebaseConfig.js" type="module"></script>
+    <script src="js/balance.js" type="module"></script>
+</body>
+</html>
