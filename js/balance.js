@@ -34,6 +34,7 @@ async function generateSalesReport() {
 
     querySnapshot.forEach((doc) => {
         const data = doc.data();
+        console.log(data);  // Agregar console.log para ver los datos
         reportData.push(data);
         totalValue += data.valor;
     });
@@ -53,56 +54,19 @@ function createPDF(title, data, totalValue = null, employeeEarnings = null, perc
     let yPosition = 20;
 
     data.forEach((item) => {
-        const itemText = `${item.fecha} - ${item.productos || item['que se hara']} - $${item.valor || ''} - ${item.t_pago || ''} ${item.cuenta ? `(${item.cuenta})` : ''}`;
+        const itemText = `${item.fecha} - ${item.productos || item['que se hara']} - $${item.valor}`;
         doc.text(itemText, 10, yPosition);
         yPosition += 10;
     });
 
     if (totalValue !== null) {
-        doc.text(`Total de Ventas: $${totalValue.toFixed(2)}`, 10, yPosition + 10);
+        doc.text(`Total Ventas: $${totalValue}`, 10, yPosition);
         yPosition += 10;
-        doc.text(`Porcentaje para Empleado (${percentage}%): $${employeeEarnings.toFixed(2)}`, 10, yPosition + 10);
+        doc.text(`Ganancias para el empleado (${percentage}%): $${employeeEarnings}`, 10, yPosition);
     }
 
-    doc.save(`${title}.pdf`);
+    doc.save('reporte_ventas.pdf');
 }
 
-// Función para generar reporte de citas en PDF
-async function generateAppointmentsReport() {
-    if (!startDateAppointments.value || !endDateAppointments.value) {
-        alert('Seleccione ambas fechas.');
-        return;
-    }
-
-    const q = query(
-        collection(db, 'citas'),
-        where('fecha', '>=', startDateAppointments.value),
-        where('fecha', '<=', endDateAppointments.value)
-    );
-
-    const querySnapshot = await getDocs(q);
-    const reportData = [];
-
-    querySnapshot.forEach((doc) => {
-        reportData.push(doc.data());
-    });
-
-    // Llamada a función para generar el PDF
-    createPDF('Reporte de Citas', reportData);
-}
-
-// Eventos de los botones
+// Asignar evento a generar reporte
 generateSalesReportButton.addEventListener('click', generateSalesReport);
-generateAppointmentsReportButton.addEventListener('click', generateAppointmentsReport);
-
-backButton.addEventListener('click', () => {
-    window.location.href = 'menu.html';
-});
-
-logoutButton.addEventListener('click', () => {
-    signOut(auth).then(() => {
-        window.location.href = "index.html";
-    }).catch((error) => {
-        console.error("Error al cerrar sesión:", error);
-    });
-});
