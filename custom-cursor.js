@@ -3,19 +3,19 @@ document.addEventListener('DOMContentLoaded', () => {
     cursor.classList.add('custom-cursor', 'cursor-default');
     document.body.appendChild(cursor);
 
-    // Seguir el movimiento del mouse
+    // Mueve el cursor a la posición exacta del mouse
     document.addEventListener('mousemove', (e) => {
-        cursor.style.left = `${e.pageX}px`;
-        cursor.style.top = `${e.pageY}px`;
+        cursor.style.left = `${e.clientX}px`;
+        cursor.style.top = `${e.clientY}px`;
     });
 
-    // Cambiar la imagen del cursor al pasar sobre elementos interactivos
+    // Cambia la imagen del cursor al pasar sobre enlaces o botones
     document.querySelectorAll('button, a').forEach(element => {
         element.addEventListener('mouseenter', () => cursor.classList.replace('cursor-default', 'cursor-hover'));
         element.addEventListener('mouseleave', () => cursor.classList.replace('cursor-hover', 'cursor-default'));
     });
 
-    // Cambiar imagen del cursor al hacer clic
+    // Cambia la imagen del cursor al hacer clic
     document.addEventListener('mousedown', () => {
         cursor.classList.replace('cursor-default', 'cursor-click');
     });
