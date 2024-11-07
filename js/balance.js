@@ -43,7 +43,7 @@ async function generateSalesReport() {
     // Llamada a función para generar el PDF usando PDFMake
     const docDefinition = {
         content: [
-            { text: 'Reporte de Ventas', fontSize: 16, bold: true },
+            { text: 'Reporte de trabajos realizados', fontSize: 16, bold: true },
             {
                 table: {
                     body: [
