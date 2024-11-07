@@ -1,21 +1,22 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Crear el cursor y agregarlo al body
+    console.log("Custom cursor script loaded");  // Verifica la carga del archivo
+
     const cursor = document.createElement('div');
     cursor.classList.add('custom-cursor', 'cursor-default');
     document.body.appendChild(cursor);
 
-    // Función para mover el cursor
+    // Mover el cursor personalizado
     document.addEventListener('mousemove', (e) => {
         cursor.style.transform = `translate(${e.pageX}px, ${e.pageY}px)`;
     });
 
-    // Cambia la imagen del cursor al pasar sobre un botón o enlace
+    // Cambiar imagen del cursor al pasar sobre elementos
     document.querySelectorAll('button, a').forEach(element => {
         element.addEventListener('mouseenter', () => cursor.classList.replace('cursor-default', 'cursor-hover'));
         element.addEventListener('mouseleave', () => cursor.classList.replace('cursor-hover', 'cursor-default'));
     });
 
-    // Cambia la imagen del cursor al hacer clic
+    // Cambiar imagen del cursor al hacer clic
     document.addEventListener('mousedown', () => {
         cursor.classList.replace('cursor-default', 'cursor-click');
     });
