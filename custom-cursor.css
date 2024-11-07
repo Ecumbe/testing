@@ -1,5 +1,5 @@
-body {
-    cursor: none; /* Oculta el cursor original */
+body, button, a, input, textarea {
+    cursor: none; /* Asegura que el cursor original esté oculto en todos los elementos */
 }
 
 .custom-cursor {
