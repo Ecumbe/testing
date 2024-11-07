@@ -38,40 +38,32 @@ async function generateSalesReport() {
         totalValue += data.valor;
     });
 
-    const employeeEarnings = (totalValue * percentage) / 100;
+    const employeeEarnings = totalValue * (percentage / 100);
 
-    const pdfContent = [
-        {
-            image: 'LOGO.png',
-            width: 100,
-            alignment: 'center',
-            margin: [0, 10, 0, 10]
-        },
-        {
-            text: 'Reporte de Ventas',
-            fontSize: 18,
-            bold: true,
-            color: '#834b8f',
-            alignment: 'center',
-            margin: [0, 10, 0, 20]
-        },
-        {
-            text: `Total de Ventas: $${totalValue.toFixed(2)}\nPorcentaje para Empleado (${percentage}%): $${employeeEarnings.toFixed(2)}`,
-            margin: [0, 10, 0, 10],
-            color: '#6d3b73'
-        },
-        {
-            text: 'Detalle de Ventas:',
-            fontSize: 14,
-            bold: true,
-            margin: [0, 10, 0, 5]
-        },
-        {
-            ul: reportData.map(item => `${item.fecha} - ${item.productos || item['que se hara']} - $${item.valor || ''} - ${item.t_pago || ''} ${item.cuenta ? `(${item.cuenta})` : ''}`)
-        }
-    ];
+    // Llamada a función para generar el PDF usando PDFMake
+    const docDefinition = {
+        content: [
+            { text: 'Reporte de Ventas', fontSize: 16, bold: true },
+            {
+                table: {
+                    body: [
+                        ['Fecha', 'Productos', 'Valor', 'Tipo de Pago', 'Cuenta'].map(text => ({ text, bold: true })),
+                        ...reportData.map(item => [
+                            item.fecha,
+                            item.productos || item['que se hara'],
+                            item.valor || '',
+                            item.t_pago || '',
+                            item.cuenta || ''
+                        ])
+                    ]
+                }
+            },
+            { text: `Total de Ventas: $${totalValue.toFixed(2)}`, bold: true },
+            { text: `Porcentaje para Empleado (${percentage}%): $${employeeEarnings.toFixed(2)}`, bold: true }
+        ]
+    };
 
-    pdfMake.createPdf({ content: pdfContent }).download('reporte_ventas.pdf');
+    pdfMake.createPdf(docDefinition).download('Reporte_de_Ventas.pdf');
 }
 
 // Función para generar reporte de citas en PDF
@@ -89,45 +81,41 @@ async function generateAppointmentsReport() {
 
     const querySnapshot = await getDocs(q);
     const reportData = [];
+
     querySnapshot.forEach((doc) => {
         reportData.push(doc.data());
     });
 
-    const pdfContent = [
-        {
-            image: 'LOGO.png',
-            width: 100,
-            alignment: 'center',
-            margin: [0, 10, 0, 10]
-        },
-        {
-            text: 'Reporte de Citas',
-            fontSize: 18,
-            bold: true,
-            color: '#834b8f',
-            alignment: 'center',
-            margin: [0, 10, 0, 20]
-        },
-        {
-            text: 'Detalle de Citas:',
-            fontSize: 14,
-            bold: true,
-            margin: [0, 10, 0, 5]
-        },
-        {
-            ul: reportData.map(item => `${item.fecha} - ${item.detalle || 'Sin detalle'}`)
-        }
-    ];
+    // Llamada a función para generar el PDF
+    const docDefinition = {
+        content: [
+            { text: 'Reporte de Citas', fontSize: 16, bold: true },
+            {
+                table: {
+                    body: [
+                        ['Fecha', 'Que se hará', 'Asistió'].map(text => ({ text, bold: true })),
+                        ...reportData.map(item => [
+                            item.fecha,
+                            item['que se hara'],
+                            item.asistio ? 'Sí' : 'No'
+                        ])
+                    ]
+                }
+            }
+        ]
+    };
 
-    pdfMake.createPdf({ content: pdfContent }).download('reporte_citas.pdf');
+    pdfMake.createPdf(docDefinition).download('Reporte_de_Citas.pdf');
 }
 
 // Eventos de los botones
 generateSalesReportButton.addEventListener('click', generateSalesReport);
 generateAppointmentsReportButton.addEventListener('click', generateAppointmentsReport);
+
 backButton.addEventListener('click', () => {
     window.location.href = 'menu.html';
 });
+
 logoutButton.addEventListener('click', () => {
     signOut(auth).then(() => {
         window.location.href = "index.html";
