@@ -21,7 +21,6 @@ async function generateSalesReport() {
     }
 
     const percentage = parseFloat(employeePercentageInput.value) || 0;
-
     const q = query(
         collection(db, 'ventas'),
         where('fecha', '>=', startDateSales.value),
@@ -34,30 +33,36 @@ async function generateSalesReport() {
 
     querySnapshot.forEach((doc) => {
         const data = doc.data();
-        console.log(data);  // Agregar console.log para ver los datos
         reportData.push(data);
         totalValue += data.valor;
     });
-@@ -53,56 +54,19 @@
-    let yPosition = 20;
 
-    data.forEach((item) => {
-        const itemText = `${item.fecha} - ${item.productos || item['que se hara']} - $${item.valor || ''} - ${item.t_pago || ''} ${item.cuenta ? `(${item.cuenta})` : ''}`;
-        const itemText = `${item.fecha} - ${item.productos || item['que se hara']} - $${item.valor}`;
-        doc.text(itemText, 10, yPosition);
-        yPosition += 10;
-    });
+    const employeeEarnings = (totalValue * percentage) / 100;
+    const pdfContent = [
+        {
+            image: 'LOGO.png',
+            width: 100,
+            alignment: 'center'
+        },
+        {
+            text: 'Reporte de Ventas',
+            fontSize: 18,
+            bold: true,
+            color: '#834b8f',
+            alignment: 'center',
+            margin: [0, 10, 0, 20]
+        },
+        {
+            text: `Total de Ventas: $${totalValue.toFixed(2)}\nPorcentaje para Empleado (${percentage}%): $${employeeEarnings.toFixed(2)}`,
+            margin: [0, 10, 0, 10],
+            color: '#6d3b73'
+        },
+        {
+            ul: reportData.map(item => `${item.fecha} - ${item.productos || item['que se hara']} - $${item.valor || ''} - ${item.t_pago || ''} ${item.cuenta ? `(${item.cuenta})` : ''}`)
+        }
+    ];
 
-    if (totalValue !== null) {
-        doc.text(`Total de Ventas: $${totalValue.toFixed(2)}`, 10, yPosition + 10);
-        doc.text(`Total Ventas: $${totalValue}`, 10, yPosition);
-        yPosition += 10;
-        doc.text(`Porcentaje para Empleado (${percentage}%): $${employeeEarnings.toFixed(2)}`, 10, yPosition + 10);
-        doc.text(`Ganancias para el empleado (${percentage}%): $${employeeEarnings}`, 10, yPosition);
-    }
-
-    doc.save(`${title}.pdf`);
-    doc.save('reporte_ventas.pdf');
+    pdfMake.createPdf({ content: pdfContent }).download('reporte_ventas.pdf');
 }
 
 // Función para generar reporte de citas en PDF
@@ -66,21 +71,42 @@ async function generateAppointmentsReport() {
         alert('Seleccione ambas fechas.');
         return;
     }
+    
     const q = query(
         collection(db, 'citas'),
         where('fecha', '>=', startDateAppointments.value),
         where('fecha', '<=', endDateAppointments.value)
     );
+
     const querySnapshot = await getDocs(q);
     const reportData = [];
     querySnapshot.forEach((doc) => {
         reportData.push(doc.data());
     });
-    // Llamada a función para generar el PDF
-    createPDF('Reporte de Citas', reportData);
+
+    const pdfContent = [
+        {
+            image: 'LOGO.png',
+            width: 100,
+            alignment: 'center'
+        },
+        {
+            text: 'Reporte de Citas',
+            fontSize: 18,
+            bold: true,
+            color: '#834b8f',
+            alignment: 'center',
+            margin: [0, 10, 0, 20]
+        },
+        {
+            ul: reportData.map(item => `${item.fecha} - ${item.detalle}`)
+        }
+    ];
+
+    pdfMake.createPdf({ content: pdfContent }).download('reporte_citas.pdf');
 }
+
 // Eventos de los botones
-// Asignar evento a generar reporte
 generateSalesReportButton.addEventListener('click', generateSalesReport);
 generateAppointmentsReportButton.addEventListener('click', generateAppointmentsReport);
 backButton.addEventListener('click', () => {
