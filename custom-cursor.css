@@ -1,16 +1,24 @@
-/* Estilos para el cursor personalizado */
-.cursor {
+/* Define estilos básicos para el cursor personalizado */
+.custom-cursor {
     position: absolute;
-    pointer-events: none; /* No interferir con otros elementos interactivos */
-    z-index: 9999; /* Asegúrate de que esté por encima de otros elementos */
+    width: 32px;
+    height: 32px;
+    pointer-events: none; /* Evita que el cursor interfiera con otros elementos */
+    transition: transform 0.1s ease; /* Suaviza el movimiento */
+    z-index: 1000;
 }
 
-/* Estilos para el cursor al hacer clic */
-.click-cursor {
-    position: absolute;
-    pointer-events: none; /* No interferir con otros elementos interactivos */
-    z-index: 9998; /* Asegúrate de que no cubra otros elementos */
-    width: 40px; /* Tamaño del PNG al hacer clic (ajústalo a tu preferencia) */
-    height: 40px; /* Tamaño del PNG al hacer clic */
-    transition: all 0.3s ease; /* Transición suave si lo deseas */
+.cursor-default {
+    background-image: url('cursor.png');
+    background-size: cover;
+}
+
+.cursor-hover {
+    background-image: url('cursor1.png');
+    background-size: cover;
+}
+
+.cursor-click {
+    background-image: url('cursor2.png');
+    background-size: cover;
 }
