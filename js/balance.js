@@ -21,6 +21,7 @@ async function generateSalesReport() {
     }
 
     const percentage = parseFloat(employeePercentageInput.value) || 0;
+
     const q = query(
         collection(db, 'ventas'),
         where('fecha', '>=', startDateSales.value),
@@ -38,11 +39,13 @@ async function generateSalesReport() {
     });
 
     const employeeEarnings = (totalValue * percentage) / 100;
+
     const pdfContent = [
         {
             image: 'LOGO.png',
             width: 100,
-            alignment: 'center'
+            alignment: 'center',
+            margin: [0, 10, 0, 10]
         },
         {
             text: 'Reporte de Ventas',
@@ -58,6 +61,12 @@ async function generateSalesReport() {
             color: '#6d3b73'
         },
         {
+            text: 'Detalle de Ventas:',
+            fontSize: 14,
+            bold: true,
+            margin: [0, 10, 0, 5]
+        },
+        {
             ul: reportData.map(item => `${item.fecha} - ${item.productos || item['que se hara']} - $${item.valor || ''} - ${item.t_pago || ''} ${item.cuenta ? `(${item.cuenta})` : ''}`)
         }
     ];
@@ -71,7 +80,7 @@ async function generateAppointmentsReport() {
         alert('Seleccione ambas fechas.');
         return;
     }
-    
+
     const q = query(
         collection(db, 'citas'),
         where('fecha', '>=', startDateAppointments.value),
@@ -88,7 +97,8 @@ async function generateAppointmentsReport() {
         {
             image: 'LOGO.png',
             width: 100,
-            alignment: 'center'
+            alignment: 'center',
+            margin: [0, 10, 0, 10]
         },
         {
             text: 'Reporte de Citas',
@@ -99,7 +109,13 @@ async function generateAppointmentsReport() {
             margin: [0, 10, 0, 20]
         },
         {
-            ul: reportData.map(item => `${item.fecha} - ${item.detalle}`)
+            text: 'Detalle de Citas:',
+            fontSize: 14,
+            bold: true,
+            margin: [0, 10, 0, 5]
+        },
+        {
+            ul: reportData.map(item => `${item.fecha} - ${item.detalle || 'Sin detalle'}`)
         }
     ];
 
