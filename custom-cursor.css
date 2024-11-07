@@ -1,15 +1,14 @@
 body {
-    cursor: none;
+    cursor: none; /* Oculta el cursor original */
 }
-/* Mantener el resto de los estilos */
+
 .custom-cursor {
-    position: absolute;
-    width: 32px; /* Ajusta el tamaño según sea necesario */
+    position: fixed; /* Cambia a fixed para que no se desplace por el desplazamiento de la página */
+    width: 32px; /* Ajusta el tamaño al tamaño de la imagen */
     height: 32px;
     pointer-events: none;
-    transition: transform 0.1s ease;
+    transform: translate(-50%, -50%); /* Centra la imagen del cursor en el punto exacto del mouse */
     z-index: 1000;
-    transform: translate(-50%, -50%); /* Centra el cursor */
 }
 
 .cursor-default {
