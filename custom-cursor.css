@@ -4,11 +4,12 @@ body {
 /* Mantener el resto de los estilos */
 .custom-cursor {
     position: absolute;
-    width: 32px;
+    width: 32px; /* Ajusta el tamaño según sea necesario */
     height: 32px;
     pointer-events: none;
     transition: transform 0.1s ease;
     z-index: 1000;
+    transform: translate(-50%, -50%); /* Centra el cursor */
 }
 
 .cursor-default {
