@@ -85,28 +85,32 @@ async function generateAppointmentsReport() {
     querySnapshot.forEach((doc) => {
         reportData.push(doc.data());
     });
+    if (reportData.length === 0) {
+        alert('No se encontraron citas en el rango de fechas seleccionado.');
+        return;
+    }
 
     // Definición del documento PDF
     const docDefinition = {
         content: [
             {
-                image: 'LOGO.png', // Ruta del logo
-                width: 100,
+                text: 'Reporte de Citas Agendadas',
+                fontSize: 16,
+                bold: true,
                 alignment: 'center',
-                margin: [0, 0, 0, 10]
+                margin: [0, 0, 0, 20]
             },
-            { text: 'Reporte de Citas Agendadas', fontSize: 16, bold: true, color: '#007ACC', alignment: 'center', margin: [0, 0, 0, 20] },
             {
                 table: {
                     headerRows: 1,
                     widths: ['*', '*', '*', '*', '*'],
                     body: [
                         [
-                            { text: 'Fecha', bold: true, fillColor: '#007ACC', color: '#FFFFFF' },
-                            { text: 'Nombre', bold: true, fillColor: '#007ACC', color: '#FFFFFF' },
-                            { text: 'Descripción', bold: true, fillColor: '#007ACC', color: '#FFFFFF' },
-                            { text: 'Hora', bold: true, fillColor: '#007ACC', color: '#FFFFFF' },
-                            { text: 'Asistió', bold: true, fillColor: '#007ACC', color: '#FFFFFF' }
+                            { text: 'Fecha', bold: true },
+                            { text: 'Nombre', bold: true },
+                            { text: 'Descripción', bold: true },
+                            { text: 'Hora', bold: true },
+                            { text: 'Asistió', bold: true }
                         ],
                         ...reportData.map(item => [
                             item.fecha,
@@ -118,10 +122,7 @@ async function generateAppointmentsReport() {
                     ]
                 }
             }
-        ],
-        defaultStyle: {
-            font: 'Helvetica'
-        }
+        ]
     };
 
     pdfMake.createPdf(docDefinition).download('Reporte_de_Citas.pdf');
