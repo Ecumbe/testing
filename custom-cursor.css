@@ -1,10 +1,13 @@
-/* Define estilos básicos para el cursor personalizado */
+body {
+    cursor: none;
+}
+/* Mantener el resto de los estilos */
 .custom-cursor {
     position: absolute;
     width: 32px;
     height: 32px;
-    pointer-events: none; /* Evita que el cursor interfiera con otros elementos */
-    transition: transform 0.1s ease; /* Suaviza el movimiento */
+    pointer-events: none;
+    transition: transform 0.1s ease;
     z-index: 1000;
 }
 
