@@ -86,27 +86,47 @@ async function generateAppointmentsReport() {
         reportData.push(doc.data());
     });
 
-    // Llamada a función para generar el PDF
+    // Definición del documento PDF
     const docDefinition = {
         content: [
-            { text: 'Reporte de Citas', fontSize: 16, bold: true },
+            {
+                image: 'LOGO.png', // Ruta del logo
+                width: 100,
+                alignment: 'center',
+                margin: [0, 0, 0, 10]
+            },
+            { text: 'Reporte de Citas Agendadas', fontSize: 16, bold: true, color: '#007ACC', alignment: 'center', margin: [0, 0, 0, 20] },
             {
                 table: {
+                    headerRows: 1,
+                    widths: ['*', '*', '*', '*', '*'],
                     body: [
-                        ['Fecha', 'Que se hará', 'Asistió'].map(text => ({ text, bold: true })),
+                        [
+                            { text: 'Fecha', bold: true, fillColor: '#007ACC', color: '#FFFFFF' },
+                            { text: 'Nombre', bold: true, fillColor: '#007ACC', color: '#FFFFFF' },
+                            { text: 'Descripción', bold: true, fillColor: '#007ACC', color: '#FFFFFF' },
+                            { text: 'Hora', bold: true, fillColor: '#007ACC', color: '#FFFFFF' },
+                            { text: 'Asistió', bold: true, fillColor: '#007ACC', color: '#FFFFFF' }
+                        ],
                         ...reportData.map(item => [
                             item.fecha,
-                            item['que se hara'],
+                            item.nombre,
+                            item.descripcion,
+                            item.hora,
                             item.asistio ? 'Sí' : 'No'
                         ])
                     ]
                 }
             }
-        ]
+        ],
+        defaultStyle: {
+            font: 'Helvetica'
+        }
     };
 
     pdfMake.createPdf(docDefinition).download('Reporte_de_Citas.pdf');
 }
+
 
 // Eventos de los botones
 generateSalesReportButton.addEventListener('click', generateSalesReport);
