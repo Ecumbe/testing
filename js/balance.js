@@ -67,16 +67,16 @@ async function generateSalesReport() {
 }
 
 // Función para generar reporte de citas en PDF
-async function generateSalesReport() {
-    if (!startDateSales.value || !endDateSales.value) {
+async function generateAppointmentsReport() {
+    if (!startDateAppointments.value || !endDateAppointments.value) {
         alert('Seleccione ambas fechas.');
         return;
     }
 
     const q = query(
         collection(db, 'citas'),
-        where('fecha', '>=', startDateSales.value),
-        where('fecha', '<=', endDateSales.value)
+        where('fecha', '>=', startDateAppointments.value),
+        where('fecha', '<=', endDateAppointments.value)
     );
 
     const querySnapshot = await getDocs(q);
@@ -98,21 +98,21 @@ async function generateSalesReport() {
             { text: 'Reporte de Citas Agendadas', fontSize: 16, bold: true, color: '#007ACC', alignment: 'center', margin: [0, 0, 0, 20] },
             {
                 table: {
-                    
+                    headerRows: 1,
+                    widths: ['*', '*', '*', '*', '*'],
                     body: [
-                        ['Fecha','Nombre''Descripción','Hora''Asistió'].map(text => ({ text, bold: true })),
-                        /*[
+                        [
                             { text: 'Fecha', bold: true, fillColor: '#007ACC', color: '#FFFFFF' },
                             { text: 'Nombre', bold: true, fillColor: '#007ACC', color: '#FFFFFF' },
                             { text: 'Descripción', bold: true, fillColor: '#007ACC', color: '#FFFFFF' },
                             { text: 'Hora', bold: true, fillColor: '#007ACC', color: '#FFFFFF' },
                             { text: 'Asistió', bold: true, fillColor: '#007ACC', color: '#FFFFFF' }
-                        ],*/
+                        ],
                         ...reportData.map(item => [
                             item.fecha,
-                            item.nombre|| '',
-                            item.descripcion|| '',
-                            item.hora|| '',
+                            item.nombre,
+                            item.descripcion,
+                            item.hora,
                             item.asistio ? 'Sí' : 'No'
                         ])
                     ]
@@ -126,7 +126,6 @@ async function generateSalesReport() {
 
     pdfMake.createPdf(docDefinition).download('Reporte_de_Citas.pdf');
 }
-
 
 // Eventos de los botones
 generateSalesReportButton.addEventListener('click', generateSalesReport);
