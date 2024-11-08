@@ -5,7 +5,6 @@ import { signOut } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-auth
 // Referencias a elementos
 const startDateSales = document.getElementById('start-date-sales');
 const endDateSales = document.getElementById('end-date-sales');
-const employeePercentageInput = document.getElementById('employee-percentage');
 const generateSalesReportButton = document.getElementById('generate-sales-report');
 const startDateAppointments = document.getElementById('start-date-appointments');
 const endDateAppointments = document.getElementById('end-date-appointments');
@@ -29,8 +28,6 @@ async function generateSalesReport() {
         return;
     }
 
-    const percentage = parseFloat(employeePercentageInput.value) || 0;
-
     const q = query(
         collection(db, 'ventas'),
         where('fecha', '>=', startDateSales.value),
@@ -40,6 +37,7 @@ async function generateSalesReport() {
     const querySnapshot = await getDocs(q);
     const reportData = [];
     let totalValue = 0;
+    const workerEarningsMap = {};
 
     for (const doc of querySnapshot.docs) {
         const data = doc.data();
@@ -48,6 +46,7 @@ async function generateSalesReport() {
         const workerPercentage = await getWorkerPercentage(data.trabajadora);
         const workerEarnings = data.valor * (workerPercentage / 100);
 
+        // Agregar información de la venta al reporte
         reportData.push({
             fecha: data.fecha,
             productos: data.productos || data['que se hara'],
@@ -58,12 +57,17 @@ async function generateSalesReport() {
             trabajadora: data.trabajadora,
             workerEarnings: workerEarnings.toFixed(2),
         });
+        
         totalValue += data.valor;
+
+        // Acumular ganancias de la trabajadora en el mapa
+        if (!workerEarningsMap[data.trabajadora]) {
+            workerEarningsMap[data.trabajadora] = { percentage: workerPercentage, earnings: 0 };
+        }
+        workerEarningsMap[data.trabajadora].earnings += workerEarnings;
     }
 
-    const employeeEarnings = totalValue * (percentage / 100);
-
-    // Llamada a función para generar el PDF usando PDFMake
+    // Preparar el contenido del PDF
     const docDefinition = {
         content: [
             { text: 'Reporte de Servicos Realizados', fontSize: 16, bold: true },
@@ -85,7 +89,10 @@ async function generateSalesReport() {
                 }
             },
             { text: `Total de Ventas: $${totalValue.toFixed(2)}`, bold: true },
-            { text: `Porcentaje para Empleado (${percentage}%): $${employeeEarnings.toFixed(2)}`, bold: true }
+            { text: 'Ganancias por Trabajadora:', bold: true, margin: [0, 10, 0, 5] },
+            ...Object.entries(workerEarningsMap).map(([trabajadora, { percentage, earnings }]) => ({
+                text: `${trabajadora} con el ${percentage}% gana = $${earnings.toFixed(2)}`,
+            }))
         ]
     };
 
