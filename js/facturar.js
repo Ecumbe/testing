@@ -1,17 +1,19 @@
 import { db, auth } from './firebaseConfig.js';
-import { collection, getDocs, addDoc } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
+import { collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
 import { signOut } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js';
 
 const productSelect = document.getElementById('product-select');
-const selectedProductsContainer = document.getElementById('selected-products');
+const selectedProducts = document.getElementById('selected-products');
 const totalAmount = document.getElementById('total-amount');
 const paymentMethod = document.getElementById('payment-method');
 const accountSelection = document.getElementById('account-selection');
 const bankSelection = document.getElementById('bank-selection');
+const account = document.getElementById('account');
+const bank = document.getElementById('bank');
+const trabajadoraSelect = document.getElementById('trabajadoras');
 const saveInvoiceButton = document.getElementById('save-invoice');
 const facturaDate = document.getElementById('factura-date');
-const trabajadorSelect = document.getElementById('trabajadora');
-let selectedProducts = [];
+
 let total = 0;
 
 // Cargar productos desde Firebase
@@ -20,7 +22,7 @@ async function loadProducts() {
     querySnapshot.forEach((doc) => {
         const product = doc.data();
         const option = document.createElement('option');
-        option.value = product.name;
+        option.value = JSON.stringify({ name: product.name, price: product.price });
         option.textContent = `${product.name} - $${product.price.toFixed(2)}`;
         productSelect.appendChild(option);
     });
@@ -34,81 +36,111 @@ async function loadTrabajadoras() {
         const option = document.createElement('option');
         option.value = trabajadora.name;
         option.textContent = trabajadora.name;
-        trabajadorSelect.appendChild(option);
+        trabajadoraSelect.appendChild(option);
     });
 }
 
-// Agregar producto seleccionado al listado
-productSelect.addEventListener('change', (e) => {
-    const selectedProductName = e.target.value;
-    const selectedProductPrice = parseFloat(e.target.selectedOptions[0].text.split('$')[1]);
-    if (selectedProductName && selectedProductPrice) {
-        selectedProducts.push({ name: selectedProductName, price: selectedProductPrice });
-        total += selectedProductPrice;
-        totalAmount.textContent = total.toFixed(2);
+// Añadir producto seleccionado al listado
+productSelect.addEventListener('change', () => {
+    const selectedOption = productSelect.value;
+    if (!selectedOption) return;
 
-        // Crear elemento de producto seleccionado
-        const productItem = document.createElement('div');
-        productItem.classList.add('product-item');
-        productItem.innerHTML = `
-            <span>${selectedProductName} - $${selectedProductPrice.toFixed(2)}</span>
-            <button class="remove-product">Eliminar</button>
-        `;
+    const { name, price } = JSON.parse(selectedOption);
 
-        // Agregar funcionalidad para eliminar el producto
-        productItem.querySelector('.remove-product').addEventListener('click', () => {
-            const index = selectedProducts.findIndex((p) => p.name === selectedProductName && p.price === selectedProductPrice);
-            if (index !== -1) {
-                selectedProducts.splice(index, 1);
-                total -= selectedProductPrice;
-                totalAmount.textContent = total.toFixed(2);
-                productItem.remove();
-            }
-        });
-
-        selectedProductsContainer.appendChild(productItem);
-    }
+    addProductToList(name, price);
+    updateTotal(price);
+    productSelect.value = ''; // Restablecer selección
 });
 
-// Mostrar/ocultar opciones adicionales para transferencia
+// Agregar producto al listado de selección
+function addProductToList(name, price) {
+    const productItem = document.createElement('div');
+    productItem.className = 'product-item';
+    productItem.innerHTML = `
+        <span>${name} - $${price.toFixed(2)}</span>
+        <button class="remove-product">Eliminar</button>
+    `;
+
+    // Botón para eliminar el producto seleccionado
+    productItem.querySelector('.remove-product').addEventListener('click', () => {
+        productItem.remove();
+        updateTotal(-price); // Restar precio del total
+    });
+
+    selectedProducts.appendChild(productItem);
+}
+
+// Actualizar el total de la factura
+function updateTotal(amount) {
+    total += amount;
+    totalAmount.textContent = total.toFixed(2);
+}
+
+// Mostrar campos adicionales si el método de pago es transferencia
 paymentMethod.addEventListener('change', () => {
-    if (paymentMethod.value === 'transferencia') {
-        accountSelection.style.display = 'block';
-        bankSelection.style.display = 'block';
-    } else {
-        accountSelection.style.display = 'none';
-        bankSelection.style.display = 'none';
-    }
+    const isTransfer = paymentMethod.value === 'transferencia';
+    accountSelection.style.display = isTransfer ? 'block' : 'none';
+    bankSelection.style.display = isTransfer ? 'block' : 'none';
 });
 
-// Confirmar guardado de factura
-saveInvoiceButton.addEventListener('click', () => {
-    const confirmation = confirm("¿Estás seguro de que deseas guardar la factura?");
-    if (confirmation) {
-        const facturaData = {
-            productos: selectedProducts,
-            total: total,
-            metodoPago: paymentMethod.value,
-            cuenta: paymentMethod.value === 'transferencia' ? accountSelection.value : null,
-            banco: paymentMethod.value === 'transferencia' ? bankSelection.value : null,
+// Guardar factura en Firebase
+saveInvoiceButton.addEventListener('click', async () => {
+    if (!facturaDate.value || selectedProducts.children.length === 0 || !trabajadoraSelect.value) {
+        alert("Por favor, complete la fecha, seleccione al menos un producto y una trabajadora.");
+        return;
+    }
+
+    const confirmation = confirm("¿Está seguro de que desea guardar esta factura?");
+    if (!confirmation) return;
+
+    const productos = Array.from(selectedProducts.children).map(item => item.querySelector('span').textContent);
+    const t_pago = paymentMethod.value;
+    const cuenta = t_pago === 'transferencia' ? account.value : '';
+    const banco = t_pago === 'transferencia' ? bank.value : '';
+    const trabajadora = trabajadoraSelect.value;
+
+    try {
+        await addDoc(collection(db, 'ventas'), {
             fecha: facturaDate.value,
-            trabajadora: trabajadorSelect.value
-        };
-        addDoc(collection(db, 'facturas'), facturaData).then(() => {
-            alert("Factura guardada exitosamente.");
-            // Resetear los campos después de guardar
-            selectedProducts = [];
-            total = 0;
-            totalAmount.textContent = "0.00";
-            selectedProductsContainer.innerHTML = "";
-            facturaDate.value = "";
-            trabajadorSelect.value = "";
-        }).catch((error) => {
-            console.error("Error al guardar la factura: ", error);
+            productos,
+            t_pago,
+            cuenta,
+            banco,
+            trabajadora,
+            valor: total
         });
+        alert("Factura guardada exitosamente.");
+        
+        // Restablecer datos
+        selectedProducts.innerHTML = '';
+        total = 0;
+        totalAmount.textContent = '0.00';
+        facturaDate.value = '';
+        trabajadoraSelect.value = '';
+    } catch (error) {
+        console.error("Error al guardar la factura:", error);
     }
 });
 
-// Cargar productos y trabajadoras al iniciar
+// Cerrar sesión
+document.getElementById('logout').addEventListener('click', () => {
+    signOut(auth).then(() => {
+        window.location.href = "index.html";
+    }).catch((error) => {
+        console.error("Error al cerrar sesión:", error);
+    });
+});
+
+// Regresar al menú
+document.getElementById('back').addEventListener('click', () => {
+    window.location.href = "menu.html";
+});
+
+// Revisar facturas (función temporal)
+document.getElementById('review-invoices').addEventListener('click', () => {
+    window.location.href = "revisar.html";
+});
+
+// Cargar datos al iniciar
 loadProducts();
 loadTrabajadoras();
