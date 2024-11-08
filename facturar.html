@@ -13,24 +13,19 @@
         
         <!-- Selección de productos -->
         <div>
-            <label for="product-select">Selecciona los productos</label>
-            <select id="product-select">
-                <option value="">Selecciona un producto</option>
-            </select>
-            <button id="add-product">Agregar Producto</button>
+            <label for="product-dropdown">Seleccionar Producto:</label>
+            <select id="product-dropdown"></select>
         </div>
         
-        <!-- Mostrar productos seleccionados -->
-        <div id="selected-products"></div>
+        <!-- Listado de productos seleccionados -->
+        <div id="product-list"></div>
         
         <!-- Detalles de facturación -->
         <div class="factura-detalles">
-            <!-- Total fuera del cuadro principal -->
             <div class="total-container">
                 <p>Total: $<span id="total-amount">0.00</span></p>
             </div>
             
-            <!-- Método de pago, Cuenta, Banco y Trabajadora -->
             <div class="payment-date-container">
                 <div>
                     <label for="payment-method">Método de Pago:</label>
@@ -52,9 +47,9 @@
                     <label for="bank">Banco:</label>
                     <select id="bank">
                         <option value="Pichincha">Pichincha</option>
-                        <option value="Pacifico">Pacífico</option>
+                        <option value="Pacífico">Pacífico</option>
                         <option value="Guayaquil">Guayaquil</option>
-                        <option value="Bolivariano">Bolívariano</option>
+                        <option value="Bolivariano">Bolivariano</option>
                         <option value="Produbanco">Produbanco</option>
                     </select>
                 </div>
@@ -63,17 +58,19 @@
                     <label for="factura-date">Fecha:</label>
                     <input type="date" id="factura-date" required>
                 </div>
-                
-                <div>
-                    <label for="trabajadora">Trabajadora:</label>
-                    <select id="trabajadora"></select>
-                </div>
             </div>
 
-            <!-- Botones -->
+            <div>
+                <label for="trabajadora">Trabajadora:</label>
+                <select id="trabajadora"></select>
+            </div>
+
             <div class="button-container">
                 <button id="save-invoice">Guardar Factura</button>
-                <button id="revisar-facturas">Revisar Facturas</button>
+                <button id="view-invoices">Revisar Facturas</button>
+            </div>
+            
+            <div class="button-container">
                 <button id="back">Atrás</button>
                 <button id="logout">Cerrar Sesión</button>
             </div>
