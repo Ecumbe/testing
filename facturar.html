@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facturar</title>
+    <title>Facturación</title>
     <link rel="stylesheet" href="css/facturar.css">
     <link rel="stylesheet" href="custom-cursor.css">
 </head>
@@ -12,7 +12,13 @@
         <h2>Facturación</h2>
         
         <!-- Selección de productos -->
-        <div id="product-list"></div>
+        <div>
+            <label for="product-dropdown">Seleccione un Producto:</label>
+            <select id="product-dropdown">
+                <!-- Los productos serán agregados dinámicamente -->
+            </select>
+            <div id="selected-products"></div> <!-- Productos seleccionados -->
+        </div>
         
         <!-- Detalles de facturación -->
         <div class="factura-detalles">
@@ -21,7 +27,7 @@
                 <p>Total: $<span id="total-amount">0.00</span></p>
             </div>
             
-            <!-- Método de pago, Cuenta y Fecha en la misma línea -->
+            <!-- Método de pago, Cuenta, Banco y Fecha en la misma línea -->
             <div class="payment-date-container">
                 <div>
                     <label for="payment-method">Método de Pago:</label>
@@ -38,6 +44,26 @@
                         <option value="Juanita">Juanita</option>
                     </select>
                 </div>
+
+                <!-- Menú de selección de banco para transferencia -->
+                <div id="bank-selection" style="display: none;">
+                    <label for="bank">Banco:</label>
+                    <select id="bank">
+                        <option value="Pichincha">Pichincha</option>
+                        <option value="Pacifico">Pacifico</option>
+                        <option value="Guayaquil">Guayaquil</option>
+                        <option value="Bolivariano">Bolivariano</option>
+                        <option value="Produbanco">Produbanco</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="trabajadora">Trabajadora:</label>
+                    <select id="trabajadora">
+                        <option value="Arianna">Arianna</option>
+                        <option value="Juanita">Juanita</option>
+                    </select>
+                </div>
                 
                 <div>
                     <label for="factura-date">Fecha:</label>
@@ -46,9 +72,15 @@
             </div>
 
             <!-- Botones -->
-            <button id="save-invoice">Guardar Factura</button>
-            <button id="back">Atrás</button>
-            <button id="logout">Cerrar Sesión</button>
+            <div class="button-group">
+                <button id="save-invoice">Guardar Factura</button>
+                <button id="review-invoices">Revisar Facturas</button>
+            </div>
+            
+            <div class="nav-buttons">
+                <button id="back">Atrás</button>
+                <button id="logout">Cerrar Sesión</button>
+            </div>
         </div>
     </div>
 
