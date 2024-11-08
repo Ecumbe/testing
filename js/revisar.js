@@ -62,7 +62,7 @@ filterButton.addEventListener('click', () => {
 
 // Botón Volver: Regresar a facturas.html
 document.getElementById('back').addEventListener('click', function() {
-    window.location.href = 'facturas.html';  // Cambiar a la página de facturas
+    window.location.href = 'facturar.html';  // Cambiar a la página de facturas
 });
 
 // Botón Cerrar sesión: Redirigir a la página de inicio de sesión
