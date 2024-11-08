@@ -38,19 +38,20 @@ async function generateSalesReport() {
     let totalValue = 0;
     const trabajadoraEarnings = {};
 
+    // Procesar cada venta para calcular ganancias por trabajadora
     for (const doc of querySnapshot.docs) {
         const data = doc.data();
         reportData.push(data);
         totalValue += data.valor;
 
         const trabajadoraName = data.trabajadora || '';
-        const percentage = await getTrabajadoraPercentage(trabajadoraName);
-        const earning = (data.valor * (percentage / 100));
-
         if (!trabajadoraEarnings[trabajadoraName]) {
-            trabajadoraEarnings[trabajadoraName] = 0;
+            trabajadoraEarnings[trabajadoraName] = { totalSales: 0, percentage: 0, earnings: 0 };
+            trabajadoraEarnings[trabajadoraName].percentage = await getTrabajadoraPercentage(trabajadoraName);
         }
-        trabajadoraEarnings[trabajadoraName] += earning;
+
+        trabajadoraEarnings[trabajadoraName].totalSales += data.valor;
+        trabajadoraEarnings[trabajadoraName].earnings = trabajadoraEarnings[trabajadoraName].totalSales * (trabajadoraEarnings[trabajadoraName].percentage / 100);
     }
 
     // Crear contenido para el PDF con la ganancia por trabajadora
@@ -78,7 +79,8 @@ async function generateSalesReport() {
 
     // Añadir ganancias por trabajadora al contenido del PDF
     Object.keys(trabajadoraEarnings).forEach(trabajadoraName => {
-        content.push({ text: `${trabajadoraName}: $${trabajadoraEarnings[trabajadoraName].toFixed(2)}`, margin: [0, 5, 0, 0] });
+        const { percentage, earnings } = trabajadoraEarnings[trabajadoraName];
+        content.push({ text: `${trabajadoraName} gana el ${percentage}% = $${earnings.toFixed(2)}`, margin: [0, 5, 0, 0] });
     });
 
     const docDefinition = { content };
