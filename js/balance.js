@@ -49,7 +49,7 @@ async function generateSalesReport() {
         reportData.push(data);
         totalValue += data.valor;
 
-        const trabajadoraName = data.trabajadora;
+        const trabajadoraName = data.trabajadoras;
         if (trabajadoraName) {
             if (!trabajadoraEarnings[trabajadoraName]) {
                 const percentage = await getTrabajadoraPercentage(trabajadoraName);
