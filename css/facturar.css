@@ -1,8 +1,12 @@
 /* Estilo general */
 body {
-    background-color: #fce4ec;
     font-family: Arial, sans-serif;
-    color: #4a148c;
+    background-color: #f3f0ff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
 }
 
 .container {
