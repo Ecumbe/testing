@@ -1,169 +1,144 @@
-/* Estilos principales */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+// js/facturar.js
+
+import { db, auth } from './firebaseConfig.js';
+import { collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
+import { signOut } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js';
+
+const productDropdown = document.getElementById('product-dropdown');
+const selectedProductsDiv = document.getElementById('selected-products');
+const totalAmount = document.getElementById('total-amount');
+const paymentMethod = document.getElementById('payment-method');
+const accountSelection = document.getElementById('account-selection');
+const bankSelection = document.getElementById('bank-selection');
+const account = document.getElementById('account');
+const bank = document.getElementById('bank');
+const trabajadoraDropdown = document.getElementById('trabajadora');
+const saveInvoiceButton = document.getElementById('save-invoice');
+const facturaDate = document.getElementById('factura-date');
+let selectedProducts = [];
+let total = 0;
+
+// Mostrar productos desde Firebase en la lista desplegable
+async function loadProducts() {
+    const querySnapshot = await getDocs(collection(db, 'productos'));
+    productDropdown.innerHTML = '<option value="">Selecciona un producto</option>';
+    querySnapshot.forEach((doc) => {
+        const product = doc.data();
+        const option = document.createElement('option');
+        option.value = JSON.stringify({ name: product.name, price: product.price });
+        option.textContent = `${product.name} - $${product.price.toFixed(2)}`;
+        productDropdown.appendChild(option);
+    });
 }
 
-.container {
-    width: 90%;
-    max-width: 600px;
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+// Mostrar trabajadoras desde Firebase en el menú desplegable
+async function loadTrabajadoras() {
+    const querySnapshot = await getDocs(collection(db, 'trabajadoras'));
+    trabajadoraDropdown.innerHTML = '<option value="">Selecciona una trabajadora</option>';
+    querySnapshot.forEach((doc) => {
+        const trabajadora = doc.data();
+        const option = document.createElement('option');
+        option.value = trabajadora.name;
+        option.textContent = trabajadora.name;
+        trabajadoraDropdown.appendChild(option);
+    });
 }
 
-/* Encabezado */
-h1 {
-    font-size: 1.8em;
-    color: #333;
-    text-align: center;
-    margin-bottom: 20px;
+// Manejar selección de producto
+productDropdown.addEventListener('change', () => {
+    if (productDropdown.value) {
+        const product = JSON.parse(productDropdown.value);
+        addProduct(product.name, product.price);
+        productDropdown.value = "";  // Restablecer selección
+    }
+});
+
+// Agregar producto a la lista de productos seleccionados
+function addProduct(name, price) {
+    const productItem = document.createElement('div');
+    productItem.classList.add('product-item');
+    productItem.innerHTML = `
+        <span>${name} - $${price.toFixed(2)}</span>
+        <button class="remove-product">X</button>
+    `;
+    selectedProductsDiv.appendChild(productItem);
+
+    // Añadir evento para eliminar el producto
+    productItem.querySelector('.remove-product').addEventListener('click', () => {
+        selectedProducts = selectedProducts.filter(p => !(p.name === name && p.price === price));
+        total -= price;
+        totalAmount.textContent = total.toFixed(2);
+        productItem.remove();
+    });
+
+    selectedProducts.push({ name, price });
+    total += price;
+    totalAmount.textContent = total.toFixed(2);
 }
 
-/* Sección de productos */
-.select-section,
-.input-section,
-.button-section {
-    margin-bottom: 15px;
-}
+// Cambiar la visibilidad de la selección de cuenta y banco
+paymentMethod.addEventListener('change', () => {
+    const isTransfer = paymentMethod.value === 'transferencia';
+    accountSelection.style.display = isTransfer ? 'block' : 'none';
+    bankSelection.style.display = isTransfer ? 'block' : 'none';
+});
 
-.select-section label,
-.input-section label {
-    display: block;
-    font-weight: bold;
-    color: #555;
-    margin-bottom: 5px;
-}
+// Guardar factura en Firebase
+saveInvoiceButton.addEventListener('click', async () => {
+    if (!facturaDate.value || selectedProducts.length === 0 || !trabajadoraDropdown.value) {
+        alert("Por favor, complete todos los campos requeridos.");
+        return;
+    }
 
-select,
-input[type="text"],
-input[type="date"] {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1em;
-}
+    if (!confirm("¿Está seguro de que desea guardar esta factura?")) return;
 
-select:focus,
-input:focus {
-    outline: none;
-    border-color: #8a2be2;
-}
+    const t_pago = paymentMethod.value;
+    const cuenta = t_pago === 'transferencia' ? account.value : '';
+    const banco = t_pago === 'transferencia' ? bank.value : '';
+    const trabajadora = trabajadoraDropdown.value;
 
-/* Listado de productos seleccionados */
-.product-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px;
-    margin-bottom: 8px;
-    background-color: #f9f9f9;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-}
+    try {
+        await addDoc(collection(db, 'ventas'), {
+            fecha: facturaDate.value,
+            productos: selectedProducts.map(p => `${p.name} - $${p.price.toFixed(2)}`).join(', '),
+            t_pago,
+            cuenta,
+            banco,
+            trabajadora,
+            valor: total
+        });
+        alert("Factura guardada exitosamente.");
+        
+        // Restablecer valores después de guardar
+        selectedProducts = [];
+        total = 0;
+        totalAmount.textContent = '0.00';
+        selectedProductsDiv.innerHTML = '';
+        facturaDate.value = '';
+    } catch (error) {
+        console.error("Error al guardar la factura:", error);
+    }
+});
 
-.product-item span {
-    color: #555;
-}
+// Cerrar sesión
+document.getElementById('logout').addEventListener('click', () => {
+    signOut(auth).then(() => {
+        window.location.href = "index.html";
+    }).catch((error) => {
+        console.error("Error al cerrar sesión:", error);
+    });
+});
 
-.product-item button {
-    background: #ff4b5c;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em;
-}
+// Regresar al menú
+document.getElementById('back').addEventListener('click', () => {
+    window.location.href = "menu.html";
+});
 
-.product-item button:hover {
-    background: #e04350;
-}
+// Ir a la página de revisión de facturas
+document.getElementById('review-invoices').addEventListener('click', () => {
+    window.location.href = "revisar.html";
+});
 
-/* Total */
-.total-container {
-    font-weight: bold;
-    font-size: 1.2em;
-    color: #333;
-    text-align: right;
-    padding: 10px;
-    background-color: #f1f1f1;
-    border-radius: 5px;
-    margin-bottom: 15px;
-}
-
-/* Botones */
-.button-section {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-button {
-    width: 48%;
-    padding: 10px;
-    border: none;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.2s ease-in-out;
-}
-
-#save-invoice {
-    background-color: #4CAF50;
-}
-
-#save-invoice:hover {
-    background-color: #45a049;
-}
-
-#review-invoices {
-    background-color: #333;
-}
-
-#review-invoices:hover {
-    background-color: #555;
-}
-
-#back {
-    background-color: #ff9900;
-}
-
-#back:hover {
-    background-color: #e68a00;
-}
-
-#logout {
-    background-color: #d9534f;
-}
-
-#logout:hover {
-    background-color: #c9302c;
-}
-
-/* Sección de selección condicional */
-#account-selection,
-#bank-selection {
-    display: none;
-}
-
-.hidden {
-    display: none;
-}
-
-/* Ajuste para mensajes y alertas */
-.alert {
-    color: #e74c3c;
-    font-size: 0.9em;
-    margin-top: 10px;
-}
+// Cargar productos y trabajadoras al iniciar
+loadProducts();
+loadTrabajadoras();
