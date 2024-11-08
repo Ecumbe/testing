@@ -2,72 +2,87 @@ import { db, auth } from './firebaseConfig.js';
 import { collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
 import { signOut } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js';
 
-const productDropdown = document.getElementById('product-dropdown');
-const productListContainer = document.getElementById('selected-products');
+const productList = document.getElementById('product-list');
+const selectedProductsContainer = document.getElementById('selected-products');
 const totalAmount = document.getElementById('total-amount');
 const paymentMethod = document.getElementById('payment-method');
 const accountSelection = document.getElementById('account-selection');
-const account = document.getElementById('account');
 const bankSelection = document.getElementById('bank-selection');
-const bank = document.getElementById('bank');
-const trabajadora = document.getElementById('trabajadora');
+const account = document.getElementById('account');
 const saveInvoiceButton = document.getElementById('save-invoice');
 const facturaDate = document.getElementById('factura-date');
+const trabajadorSelect = document.getElementById('trabajadora');
 let selectedProducts = [];
 let total = 0;
 
-// Cargar productos desde Firebase y agregarlos al desplegable
+// Mostrar productos desde Firebase
 async function loadProducts() {
     const querySnapshot = await getDocs(collection(db, 'productos'));
-    productDropdown.innerHTML = ''; // Limpiar el dropdown
+    productList.innerHTML = '';
     querySnapshot.forEach((doc) => {
         const product = doc.data();
-        const option = document.createElement('option');
-        option.value = product.name;
-        option.textContent = `${product.name} - $${product.price.toFixed(2)}`;
-        productDropdown.appendChild(option);
+        const productOption = document.createElement('option');
+        productOption.value = product.name;
+        productOption.textContent = `${product.name} - $${product.price.toFixed(2)}`;
+        productList.appendChild(productOption);
     });
 }
 
-// Agregar producto seleccionado a la lista
-productDropdown.addEventListener('change', () => {
-    const selectedProductName = productDropdown.value;
-    const selectedProductPrice = parseFloat(productDropdown.selectedOptions[0].text.split('$')[1]);
-    
-    if (selectedProductName && !selectedProducts.some(product => product.name === selectedProductName)) {
-        selectedProducts.push({ name: selectedProductName, price: selectedProductPrice });
-        total += selectedProductPrice;
-        updateProductList();
-    }
-});
+// Cargar trabajadoras desde Firebase
+async function loadTrabajadoras() {
+    const querySnapshot = await getDocs(collection(db, 'trabajadoras'));
+    trabajadorSelect.innerHTML = ''; // Limpiar las opciones previas
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Selecciona una trabajadora';
+    trabajadorSelect.appendChild(defaultOption);
 
-// Actualizar la lista de productos seleccionados
-function updateProductList() {
-    productListContainer.innerHTML = '';
-    selectedProducts.forEach((product, index) => {
+    querySnapshot.forEach((doc) => {
+        const trabajadora = doc.data();
+        const option = document.createElement('option');
+        option.value = trabajadora.name;
+        option.textContent = trabajadora.name;
+        trabajadorSelect.appendChild(option);
+    });
+}
+
+// Actualizar el total y mostrar productos seleccionados
+function updateSelectedProducts() {
+    selectedProductsContainer.innerHTML = '';
+    selectedProducts.forEach((product) => {
         const productItem = document.createElement('div');
         productItem.classList.add('selected-product');
         productItem.innerHTML = `
             <span>${product.name} - $${product.price.toFixed(2)}</span>
-            <button class="remove-product" data-index="${index}">Eliminar</button>
+            <button onclick="removeProduct('${product.name}')">Eliminar</button>
         `;
-        productListContainer.appendChild(productItem);
+        selectedProductsContainer.appendChild(productItem);
     });
 
-    document.querySelectorAll('.remove-product').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const index = e.target.dataset.index;
-            total -= selectedProducts[index].price;
-            selectedProducts.splice(index, 1);
-            updateProductList();
-            totalAmount.textContent = total.toFixed(2);
-        });
-    });
-
-    totalAmount.textContent = total.toFixed(2);
+    total = selectedProducts.reduce((sum, product) => sum + product.price, 0);
+    totalAmount.textContent = `Total: $${total.toFixed(2)}`;
 }
 
-// Mostrar/hide account and bank selection based on payment method
+// Agregar un producto seleccionado
+function addProductToList() {
+    const selectedProductName = productList.value;
+    if (selectedProductName) {
+        const selectedProduct = {
+            name: selectedProductName,
+            price: parseFloat(productList.options[productList.selectedIndex].dataset.price)
+        };
+        selectedProducts.push(selectedProduct);
+        updateSelectedProducts();
+    }
+}
+
+// Eliminar un producto de la lista
+function removeProduct(productName) {
+    selectedProducts = selectedProducts.filter(product => product.name !== productName);
+    updateSelectedProducts();
+}
+
+// Cambiar la visibilidad de los campos
 paymentMethod.addEventListener('change', () => {
     if (paymentMethod.value === 'transferencia') {
         accountSelection.style.display = 'block';
@@ -78,41 +93,46 @@ paymentMethod.addEventListener('change', () => {
     }
 });
 
-// Guardar factura en Firebase
+// Guardar factura con confirmación
 saveInvoiceButton.addEventListener('click', async () => {
-    if (!facturaDate.value || selectedProducts.length === 0) {
-        alert("Por favor, complete la fecha y seleccione al menos un producto.");
+    const confirmSave = window.confirm('¿Estás seguro de guardar la factura?');
+    if (!confirmSave) return;
+
+    if (!facturaDate.value || selectedProducts.length === 0 || !trabajadorSelect.value) {
+        alert("Por favor, completa todos los campos.");
         return;
     }
 
     const t_pago = paymentMethod.value;
     const cuenta = t_pago === 'transferencia' ? account.value : '';
-    const banco = t_pago === 'transferencia' ? bank.value : '';
-    const trabajadoraNombre = trabajadora.value;
+    const banco = t_pago === 'transferencia' ? document.getElementById('bank').value : '';
+    const trabajadora = trabajadorSelect.value;
 
-    if (confirm("¿Está seguro de que desea guardar la factura?")) {
-        try {
-            await addDoc(collection(db, 'ventas'), {
-                fecha: facturaDate.value,
-                productos: selectedProducts.map(product => product.name).join(', '),
-                t_pago,
-                cuenta,
-                banco,
-                trabajadora: trabajadoraNombre,
-                valor: total
-            });
-            alert("Factura guardada exitosamente.");
-            selectedProducts = [];
-            total = 0;
-            totalAmount.textContent = '0.00';
-            loadProducts(); // Recargar los productos
-        } catch (error) {
-            console.error("Error al guardar la factura:", error);
-        }
+    try {
+        await addDoc(collection(db, 'ventas'), {
+            fecha: facturaDate.value,
+            productos: selectedProducts.map(product => product.name).join(', '),
+            t_pago,
+            cuenta,
+            banco,
+            valor: total,
+            trabajadora
+        });
+        alert("Factura guardada exitosamente.");
+        selectedProducts = [];
+        total = 0;
+        updateSelectedProducts();
+        loadProducts();
+    } catch (error) {
+        console.error("Error al guardar la factura:", error);
     }
 });
 
-// Cerrar sesión
+// Cargar productos y trabajadoras al iniciar
+loadProducts();
+loadTrabajadoras();
+
+// Función de logout
 document.getElementById('logout').addEventListener('click', () => {
     signOut(auth).then(() => {
         window.location.href = "index.html";
@@ -125,6 +145,3 @@ document.getElementById('logout').addEventListener('click', () => {
 document.getElementById('back').addEventListener('click', () => {
     window.location.href = "menu.html";
 });
-
-// Cargar productos al iniciar
-loadProducts();
