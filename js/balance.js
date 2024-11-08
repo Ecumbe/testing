@@ -12,6 +12,14 @@ const generateAppointmentsReportButton = document.getElementById('generate-appoi
 const backButton = document.getElementById('back');
 const logoutButton = document.getElementById('logout');
 
+// Función para obtener el porcentaje de ganancia de cada trabajadora
+async function getTrabajadoraPercentage(trabajadoraName) {
+    const q = query(collection(db, 'trabajadoras'), where('nombre', '==', trabajadoraName));
+    const querySnapshot = await getDocs(q);
+    const trabajadoraData = querySnapshot.docs[0]?.data();
+    return trabajadoraData ? trabajadoraData.percentage : 0;
+}
+
 // Función para generar reporte de ventas en PDF
 async function generateSalesReport() {
     if (!startDateSales.value || !endDateSales.value) {
@@ -28,68 +36,56 @@ async function generateSalesReport() {
     const querySnapshot = await getDocs(q);
     const reportData = [];
     let totalValue = 0;
+    const trabajadoraEarnings = {};
 
-    const trabajadorasPorcentajes = {};
-
-    // Obtener porcentaje de cada trabajadora desde la base de datos
-    const trabajadorasSnapshot = await getDocs(collection(db, 'trabajadoras'));
-    trabajadorasSnapshot.forEach((doc) => {
-        const data = doc.data();
-        trabajadorasPorcentajes[data.nombre] = data.porcentaje; // Guardamos el porcentaje de cada trabajadora por su nombre
-    });
-
-    querySnapshot.forEach((doc) => {
+    for (const doc of querySnapshot.docs) {
         const data = doc.data();
         reportData.push(data);
         totalValue += data.valor;
-    });
 
-    // Calcular ganancias para cada trabajadora
-    const trabajadorasGanancias = {};
-    reportData.forEach(item => {
-        const trabajadora = item.trabajadora;
-        const porcentaje = trabajadorasPorcentajes[trabajadora] || 0; // Usar el porcentaje desde la base de datos
-        const ganancia = item.valor * (porcentaje / 100);
-        
-        if (!trabajadorasGanancias[trabajadora]) {
-            trabajadorasGanancias[trabajadora] = 0;
+        const trabajadoraName = data.trabajadora || '';
+        const percentage = await getTrabajadoraPercentage(trabajadoraName);
+        const earning = (data.valor * (percentage / 100));
+
+        if (!trabajadoraEarnings[trabajadoraName]) {
+            trabajadoraEarnings[trabajadoraName] = 0;
         }
-        trabajadorasGanancias[trabajadora] += ganancia;
+        trabajadoraEarnings[trabajadoraName] += earning;
+    }
+
+    // Crear contenido para el PDF con la ganancia por trabajadora
+    const content = [
+        { text: 'Reporte de Servicios Realizados', fontSize: 16, bold: true },
+        {
+            table: {
+                body: [
+                    ['Fecha', 'Productos', 'Valor', 'Tipo de Pago', 'Cuenta', 'Banco', 'Trabajadora'].map(text => ({ text, bold: true })),
+                    ...reportData.map(item => [
+                        item.fecha,
+                        item.productos || item['que se hara'],
+                        item.valor || '',
+                        item.t_pago || '',
+                        item.cuenta || '',
+                        item.banco || '',
+                        item.trabajadora || ''
+                    ])
+                ]
+            }
+        },
+        { text: `Total de Ventas: $${totalValue.toFixed(2)}`, bold: true },
+        { text: 'Ganancias por Trabajadora:', bold: true }
+    ];
+
+    // Añadir ganancias por trabajadora al contenido del PDF
+    Object.keys(trabajadoraEarnings).forEach(trabajadoraName => {
+        content.push({ text: `${trabajadoraName}: $${trabajadoraEarnings[trabajadoraName].toFixed(2)}`, margin: [0, 5, 0, 0] });
     });
 
-    // Definición del documento PDF
-    const docDefinition = {
-        content: [
-            { text: 'Reporte de Servicos Realizados', fontSize: 16, bold: true },
-            {
-                table: {
-                    body: [
-                        ['Fecha', 'Productos', 'Valor', 'Tipo de Pago', 'Cuenta', 'Banco', 'Trabajadora', 'Ganancia'].map(text => ({ text, bold: true })),
-                        ...reportData.map(item => [
-                            item.fecha,
-                            item.productos || item['que se hara'],
-                            item.valor || '',
-                            item.t_pago || '',
-                            item.cuenta || '',
-                            item.banco || '',
-                            item.trabajadora || '',
-                            `$${(item.valor * (trabajadorasPorcentajes[item.trabajadora] || 0) / 100).toFixed(2)}`
-                        ])
-                    ]
-                }
-            },
-            { text: `Total de Ventas: $${totalValue.toFixed(2)}`, bold: true },
-            ...Object.entries(trabajadorasGanancias).map(([trabajadora, ganancia]) => ({
-                text: `Ganancia para ${trabajadora}: $${ganancia.toFixed(2)}`,
-                bold: true
-            }))
-        ]
-    };
-
+    const docDefinition = { content };
     pdfMake.createPdf(docDefinition).download('Reporte_de_Ventas.pdf');
 }
 
-// Función para generar reporte de citas en PDF
+// Función para generar reporte de citas en PDF (sin cambios)
 async function generateAppointmentsReport() {
     if (!startDateAppointments.value || !endDateAppointments.value) {
         alert('Seleccione ambas fechas.');
@@ -113,7 +109,6 @@ async function generateAppointmentsReport() {
         return;
     }
 
-    // Definición del documento PDF
     const docDefinition = {
         content: [
             {
