@@ -78,3 +78,32 @@ tr:hover {
     border-radius: 4px;
     cursor: pointer;
 }
+
+.actions-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+button {
+    width: 48%;
+    background-color: #7a287a;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+button:hover {
+    background-color: #5d1b5d;
+}
+
+#back, #logout {
+    background-color: #d9534f;
+}
+
+#back:hover, #logout:hover {
+    background-color: #c12e2a;
+}
