@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revisar Facturas</title>
+    <link rel="stylesheet" href="css/revisar.css">
+    <link rel="stylesheet" href="custom-cursor.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Revisar Facturas</h1>
+        
+        <div class="filter-section">
+            <label for="filter-date">Seleccione Fecha:</label>
+            <input type="date" id="filter-date">
+            <button id="filter-button">Filtrar</button>
+        </div>
+
+        <table id="invoice-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Productos</th>
+                    <th>Método de Pago</th>
+                    <th>Cuenta</th>
+                    <th>Banco</th>
+                    <th>Trabajadora</th>
+                    <th>Total</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="invoice-body">
+                <!-- Las facturas se agregarán aquí dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js"></script>
+    <script src="js/firebaseConfig.js" type="module"></script>
+    <script src="js/facturar.js" type="module"></script>
+    <script src="custom-cursor.js" defer></script>
+</body>
+</html>
