@@ -14,15 +14,22 @@ const logoutButton = document.getElementById('logout');
 
 // Función para obtener el porcentaje de ganancia de cada trabajadora
 async function getTrabajadoraPercentage(trabajadoraName) {
-    const q = query(collection(db, 'trabajadoras'), where('nombre', '==', trabajadoraName));
-    const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) {
-        console.log(`No se encontró el porcentaje para: ${trabajadoraName}`);
-        return 0; // Retorna 0 si no encuentra la trabajadora
+    try {
+        // Consulta para obtener el porcentaje de ganancia de la trabajadora por su nombre
+        const q = query(collection(db, 'trabajadoras'), where('name', '==', trabajadoraName));
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) {
+            console.log(`No se encontró el porcentaje para: ${trabajadoraName}`);
+            return 0; // Retorna 0 si no encuentra la trabajadora
+        }
+        const trabajadoraData = querySnapshot.docs[0].data();
+        console.log(`Porcentaje de ganancia de ${trabajadoraName}: ${trabajadoraData.percentage}%`);
+        return trabajadoraData.percentage; // Retorna el porcentaje
+    } catch (error) {
+        console.error("Error al obtener el porcentaje de la trabajadora:", error);
+        return 0;
     }
-    const trabajadoraData = querySnapshot.docs[0].data();
-    console.log(`Porcentaje de ganancia de ${trabajadoraName}: ${trabajadoraData.percentage}%`);
-    return trabajadoraData.percentage;
 }
 
 // Función para generar reporte de ventas en PDF
@@ -49,24 +56,27 @@ async function generateSalesReport() {
         reportData.push(data);
         totalValue += data.valor;
 
-        const trabajadoraName = data.trabajadoras;
+        const trabajadoraName = data.trabajadora;
         if (trabajadoraName) {
+            // Si la trabajadora no tiene un registro, inicializamos
             if (!trabajadoraEarnings[trabajadoraName]) {
                 const percentage = await getTrabajadoraPercentage(trabajadoraName);
                 trabajadoraEarnings[trabajadoraName] = { totalSales: 0, percentage, earnings: 0 };
             }
 
+            // Sumar el valor de la venta a las ventas de la trabajadora
             trabajadoraEarnings[trabajadoraName].totalSales += data.valor;
         }
     }
 
     // Calcular las ganancias de cada trabajadora
-    Object.keys(trabajadoraEarnings).forEach(trabajadoraName => {
+    for (const trabajadoraName in trabajadoraEarnings) {
         const { percentage, totalSales } = trabajadoraEarnings[trabajadoraName];
         const earnings = totalSales * (percentage / 100);
         trabajadoraEarnings[trabajadoraName].earnings = earnings;
+
         console.log(`Ganancia de ${trabajadoraName}: $${earnings.toFixed(2)} (${totalSales} * ${percentage}%)`);
-    });
+    }
 
     // Crear contenido para el PDF con la ganancia por trabajadora
     const content = [
@@ -92,10 +102,10 @@ async function generateSalesReport() {
     ];
 
     // Añadir ganancias por trabajadora al contenido del PDF
-    Object.keys(trabajadoraEarnings).forEach(trabajadoraName => {
+    for (const trabajadoraName in trabajadoraEarnings) {
         const { percentage, earnings } = trabajadoraEarnings[trabajadoraName];
         content.push({ text: `${trabajadoraName} (Porcentaje: ${percentage}%) gana: $${earnings.toFixed(2)}`, margin: [0, 5, 0, 0] });
-    });
+    }
 
     const docDefinition = { content };
     pdfMake.createPdf(docDefinition).download('Reporte_de_Ventas.pdf');
