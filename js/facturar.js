@@ -34,7 +34,7 @@ async function loadProducts() {
 
 // Cargar trabajadoras
 async function loadTrabajadoras() {
-    const querySnapshot = await getDocs(collection(db, 'trabajadoras'));
+    const querySnapshot = await getDocs(collection(db, 'trabajadora'));
     trabajadoraSelect.innerHTML = ''; // Limpiar lista
     querySnapshot.forEach((doc) => {
         const trabajadora = doc.data();
