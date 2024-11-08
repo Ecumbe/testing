@@ -16,7 +16,22 @@ const trabajadoraDropdown = document.getElementById('trabajadora');
 const reviewInvoicesButton = document.getElementById('review-invoices');
 let selectedProducts = [];
 let total = 0;
-
+// Verificar autenticación al cargar
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        window.location.href = "index.html"; // Redirigir al inicio si no está autenticado
+    }
+});
+// Función de cerrar sesión
+document.getElementById('logout').addEventListener('click', () => {
+    signOut(auth).then(() => {
+        // Borrar el historial para que no se pueda regresar
+        window.history.pushState(null, null, "index.html");
+        window.history.go(0); // Recargar para aplicar la redirección
+    }).catch((error) => {
+        console.error("Error al cerrar sesión:", error);
+    });
+});
 // Cargar productos desde Firebase y llenar el dropdown
 async function loadProducts() {
     const querySnapshot = await getDocs(collection(db, 'productos'));
@@ -123,15 +138,6 @@ saveInvoiceButton.addEventListener('click', async () => {
     } catch (error) {
         console.error("Error al guardar la factura:", error);
     }
-});
-
-// Cerrar sesión
-document.getElementById('logout').addEventListener('click', () => {
-    signOut(auth).then(() => {
-        window.location.href = "index.html";
-    }).catch((error) => {
-        console.error("Error al cerrar sesión:", error);
-    });
 });
 
 // Redirigir a la página de revisión de facturas
