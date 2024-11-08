@@ -1,126 +1,169 @@
-/* Estilos generales */
+/* Estilos principales */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f3f0ff;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
+    min-height: 100vh;
 }
 
-.facturacion-container {
-    background-color: #fcdff1;
+.container {
+    width: 90%;
+    max-width: 600px;
+    background: #fff;
+    padding: 20px;
     border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    padding: 30px;
-    width: 450px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Encabezado */
+h1 {
+    font-size: 1.8em;
+    color: #333;
     text-align: center;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-h2 {
-    color: #834b8f;
     margin-bottom: 20px;
-    font-size: 1.6em;
 }
 
-/* Selección de productos */
-#product-select {
+/* Sección de productos */
+.select-section,
+.input-section,
+.button-section {
+    margin-bottom: 15px;
+}
+
+.select-section label,
+.input-section label {
+    display: block;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+select,
+input[type="text"],
+input[type="date"] {
     width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    font-size: 1em;
-    border-radius: 5px;
+    padding: 8px;
+    margin-bottom: 10px;
     border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
 }
 
-#selected-products {
-    margin-top: 20px;
-    text-align: left;
+select:focus,
+input:focus {
+    outline: none;
+    border-color: #8a2be2;
 }
 
+/* Listado de productos seleccionados */
 .product-item {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10px;
-    padding: 10px;
-    background-color: #fff;
-    border: 1px solid #ddd;
+    align-items: center;
+    padding: 8px;
+    margin-bottom: 8px;
+    background-color: #f9f9f9;
     border-radius: 5px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+}
+
+.product-item span {
+    color: #555;
 }
 
 .product-item button {
-    background-color: #d9534f;
-    color: white;
+    background: #ff4b5c;
+    color: #fff;
     border: none;
     padding: 5px 10px;
+    border-radius: 5px;
     cursor: pointer;
+    font-size: 0.9em;
 }
 
 .product-item button:hover {
-    background-color: #c12e2a;
+    background: #e04350;
 }
 
-/* Detalles de facturación */
+/* Total */
 .total-container {
-    background-color: #f3f0ff;
-    border-radius: 10px;
-    padding: 15px;
-    font-size: 1.5em;
     font-weight: bold;
-    color: #834b8f;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
-    text-align: center;
+    font-size: 1.2em;
+    color: #333;
+    text-align: right;
+    padding: 10px;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    margin-bottom: 15px;
 }
 
-.payment-date-container {
+/* Botones */
+.button-section {
     display: flex;
     justify-content: space-between;
     gap: 10px;
 }
 
-.payment-date-container div {
-    flex: 1;
-}
-
-#factura-date, #payment-method, #account, #trabajadora, #bank {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    font-size: 1em;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-}
-
-.buttons-container {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
 button {
     width: 48%;
-    background-color: #834b8f;
-    color: white;
-    border: none;
     padding: 10px;
+    border: none;
+    color: white;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 1.2em;
+    font-size: 1em;
+    transition: background-color 0.2s ease-in-out;
 }
 
-button:hover {
-    background-color: #6d3b73;
+#save-invoice {
+    background-color: #4CAF50;
 }
 
-#back, #logout {
+#save-invoice:hover {
+    background-color: #45a049;
+}
+
+#review-invoices {
+    background-color: #333;
+}
+
+#review-invoices:hover {
+    background-color: #555;
+}
+
+#back {
+    background-color: #ff9900;
+}
+
+#back:hover {
+    background-color: #e68a00;
+}
+
+#logout {
     background-color: #d9534f;
 }
 
-#back:hover, #logout:hover {
-    background-color: #c12e2a;
+#logout:hover {
+    background-color: #c9302c;
+}
+
+/* Sección de selección condicional */
+#account-selection,
+#bank-selection {
+    display: none;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Ajuste para mensajes y alertas */
+.alert {
+    color: #e74c3c;
+    font-size: 0.9em;
+    margin-top: 10px;
 }
