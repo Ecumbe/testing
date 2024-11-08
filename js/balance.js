@@ -16,8 +16,12 @@ const logoutButton = document.getElementById('logout');
 async function getTrabajadoraPercentage(trabajadoraName) {
     const q = query(collection(db, 'trabajadoras'), where('nombre', '==', trabajadoraName));
     const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) return 0; // Retorna 0 si no encuentra la trabajadora
+    if (querySnapshot.empty) {
+        console.log(`No se encontró el porcentaje para: ${trabajadoraName}`);
+        return 0; // Retorna 0 si no encuentra la trabajadora
+    }
     const trabajadoraData = querySnapshot.docs[0].data();
+    console.log(`Porcentaje de ganancia de ${trabajadoraName}: ${trabajadoraData.percentage}%`);
     return trabajadoraData.percentage;
 }
 
@@ -61,6 +65,7 @@ async function generateSalesReport() {
         const { percentage, totalSales } = trabajadoraEarnings[trabajadoraName];
         const earnings = totalSales * (percentage / 100);
         trabajadoraEarnings[trabajadoraName].earnings = earnings;
+        console.log(`Ganancia de ${trabajadoraName}: $${earnings.toFixed(2)} (${totalSales} * ${percentage}%)`);
     });
 
     // Crear contenido para el PDF con la ganancia por trabajadora
