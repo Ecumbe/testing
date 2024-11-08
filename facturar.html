@@ -4,88 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Facturación</title>
-    <link rel="stylesheet" href="css/facturar.css">
-    <link rel="stylesheet" href="custom-cursor.css">
+    <link rel="stylesheet" href="css/factura.css">
 </head>
 <body>
     <div class="facturacion-container">
         <h2>Facturación</h2>
-        
-        <!-- Selección de productos -->
-        <div>
-            <label for="product-dropdown">Seleccione un Producto:</label>
-            <select id="product-dropdown">
-                <!-- Los productos serán agregados dinámicamente -->
-            </select>
-            <div id="selected-products"></div> <!-- Productos seleccionados -->
-        </div>
-        
-        <!-- Detalles de facturación -->
+
+        <!-- Productos -->
         <div class="factura-detalles">
-            <!-- Total fuera del cuadro principal -->
-            <div class="total-container">
-                <p>Total: $<span id="total-amount">0.00</span></p>
-            </div>
-            
-            <!-- Método de pago, Cuenta, Banco y Fecha en la misma línea -->
-            <div class="payment-date-container">
-                <div>
-                    <label for="payment-method">Método de Pago:</label>
-                    <select id="payment-method">
-                        <option value="efectivo">Efectivo</option>
-                        <option value="transferencia">Transferencia</option>
-                    </select>
-                </div>
-                
-                <div id="account-selection" style="display: none;">
-                    <label for="account">Cuenta:</label>
-                    <select id="account">
-                        <option value="Arianna">Arianna</option>
-                        <option value="Juanita">Juanita</option>
-                    </select>
-                </div>
+            <label for="product-list">Selecciona los productos:</label>
+            <select id="product-list" multiple>
+                <!-- Los productos se cargarán aquí dinámicamente -->
+            </select>
+        </div>
 
-                <!-- Menú de selección de banco para transferencia -->
-                <div id="bank-selection" style="display: none;">
-                    <label for="bank">Banco:</label>
-                    <select id="bank">
-                        <option value="Pichincha">Pichincha</option>
-                        <option value="Pacifico">Pacifico</option>
-                        <option value="Guayaquil">Guayaquil</option>
-                        <option value="Bolivariano">Bolivariano</option>
-                        <option value="Produbanco">Produbanco</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="trabajadora">Trabajadora:</label>
-                    <select id="trabajadora">
-                        <option value="Arianna">Arianna</option>
-                        <option value="Juanita">Juanita</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="factura-date">Fecha:</label>
-                    <input type="date" id="factura-date" required>
-                </div>
+        <!-- Productos seleccionados -->
+        <div id="selected-products"></div>
+
+        <!-- Total -->
+        <div id="total-amount">Total: $0.00</div>
+
+        <!-- Método de pago y cuenta -->
+        <div class="payment-date-container">
+            <div>
+                <label for="payment-method">Método de Pago</label>
+                <select id="payment-method">
+                    <option value="efectivo">Efectivo</option>
+                    <option value="transferencia">Transferencia</option>
+                </select>
             </div>
 
-            <!-- Botones -->
-            <div class="button-group">
-                <button id="save-invoice">Guardar Factura</button>
-                <button id="review-invoices">Revisar Facturas</button>
+            <div id="account-selection" class="hidden">
+                <label for="account">Cuenta de Transferencia</label>
+                <input type="text" id="account" placeholder="Número de cuenta">
             </div>
-            
-            <div class="nav-buttons">
-                <button id="back">Atrás</button>
-                <button id="logout">Cerrar Sesión</button>
+
+            <div id="bank-selection" class="hidden">
+                <label for="bank">Banco</label>
+                <select id="bank">
+                    <option value="Pichincha">Pichincha</option>
+                    <option value="Pacífico">Pacífico</option>
+                    <option value="Guayaquil">Guayaquil</option>
+                    <option value="Bolivariano">Bolivariano</option>
+                    <option value="Produbanco">Produbanco</option>
+                </select>
             </div>
+        </div>
+
+        <!-- Trabajadora -->
+        <div>
+            <label for="trabajadora">Trabajadora</label>
+            <select id="trabajadora">
+                <!-- Trabajadoras se cargarán aquí -->
+            </select>
+        </div>
+
+        <!-- Fecha de factura -->
+        <label for="factura-date">Fecha de la factura</label>
+        <input type="date" id="factura-date">
+
+        <!-- Botones -->
+        <div>
+            <button id="save-invoice">Guardar Factura</button>
+            <button id="revisar-facturas">Revisar Facturas</button>
+        </div>
+
+        <div>
+            <button id="back">Atrás</button>
+            <button id="logout">Cerrar Sesión</button>
         </div>
     </div>
-
-    <script src="js/firebaseConfig.js" type="module"></script>
-    <script src="js/facturar.js" type="module"></script>
-    <script src="custom-cursor.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js"></script>
+    <script src="js/factura.js"></script>
 </body>
 </html>
