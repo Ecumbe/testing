@@ -77,10 +77,12 @@ async function generateSalesReport() {
         { text: 'Ganancias por Trabajadora:', bold: true }
     ];
 
-    // Añadir ganancias por trabajadora al contenido del PDF
+    // Añadir ganancias por trabajadora al contenido del PDF solo si tienen un porcentaje y ganancia mayor a 0
     Object.keys(trabajadoraEarnings).forEach(trabajadoraName => {
         const { percentage, earnings } = trabajadoraEarnings[trabajadoraName];
-        content.push({ text: `${trabajadoraName} gana el ${percentage}% = $${earnings.toFixed(2)}`, margin: [0, 5, 0, 0] });
+        if (percentage > 0 && earnings > 0) {
+            content.push({ text: `${trabajadoraName} gana el ${percentage}% = $${earnings.toFixed(2)}`, margin: [0, 5, 0, 0] });
+        }
     });
 
     const docDefinition = { content };
