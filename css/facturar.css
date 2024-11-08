@@ -37,7 +37,12 @@ label {
     font-size: 0.9em;
 }
 
-select, input[type="text"], input[type="date"] {
+#product-dropdown,
+#trabajadora,
+#payment-method,
+#account,
+#bank,
+#factura-date {
     width: 100%;
     padding: 10px;
     margin-top: 10px;
@@ -46,71 +51,62 @@ select, input[type="text"], input[type="date"] {
     border: 1px solid #ddd;
 }
 
-#product-list {
-    margin-bottom: 20px;
+#selected-products-list {
+    margin-top: 15px;
     text-align: left;
+    max-height: 150px;
     overflow-y: auto;
-    max-height: 200px;
 }
 
-#selected-products {
-    margin-top: 20px;
-}
-
-.selected-product {
+.product-item {
     display: flex;
     justify-content: space-between;
-    background-color: #fff;
+    align-items: center;
     padding: 10px;
-    margin-bottom: 10px;
+    background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 5px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 5px;
+    color: #834b8f;
 }
 
-.selected-product button {
+.product-item button {
     background-color: #d9534f;
-    color: white;
     border: none;
-    padding: 5px 10px;
+    color: white;
+    padding: 5px;
+    border-radius: 3px;
     cursor: pointer;
+    font-size: 0.8em;
 }
 
-.selected-product button:hover {
+.product-item button:hover {
     background-color: #c12e2a;
 }
 
+/* Contenedor del valor total */
 #total-amount {
-    font-size: 2em;
+    font-size: 1.5em;
     font-weight: bold;
-    padding: 30px;
+    padding: 15px;
     background-color: #f3f0ff;
-    border-radius: 15px;
-    margin-top: 20px;
+    border-radius: 10px;
+    margin-top: 15px;
     color: #834b8f;
     text-align: center;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.payment-date-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.payment-date-container div {
-    flex: 1;
-}
-
+/* Botones de acciones */
 button {
-    width: 100%;
+    width: 48%;
     background-color: #834b8f;
     color: white;
     border: none;
     padding: 10px;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 1.2em;
+    font-size: 1em;
     margin-top: 10px;
 }
 
@@ -118,15 +114,31 @@ button:hover {
     background-color: #6d3b73;
 }
 
-.hidden {
-    display: none;
-}
-
 #back, #logout {
-    margin-top: 20px;
     background-color: #d9534f;
 }
 
 #back:hover, #logout:hover {
     background-color: #c12e2a;
+}
+
+#review-invoices {
+    background-color: #5cb85c;
+}
+
+#review-invoices:hover {
+    background-color: #4cae4c;
+}
+
+/* Flex para los botones de la parte inferior */
+.actions-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* Ocultar campos de cuenta y banco por defecto */
+#account-selection,
+#bank-selection {
+    display: none;
 }
