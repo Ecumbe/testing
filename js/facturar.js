@@ -3,15 +3,18 @@ import { db, auth } from './firebaseConfig.js';
 import { collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
 import { signOut } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js';
 
-const productDropdown = document.getElementById('product-dropdown');
-const productListContainer = document.getElementById('product-list');
+const productSelect = document.getElementById('product-select');
+const addProductButton = document.getElementById('add-product');
+const selectedProductsDiv = document.getElementById('selected-products');
 const totalAmount = document.getElementById('total-amount');
 const paymentMethod = document.getElementById('payment-method');
 const accountSelection = document.getElementById('account-selection');
-const bankSelection = document.getElementById('bank');
-const trabajadoraDropdown = document.getElementById('trabajadora-dropdown');
+const bankSelection = document.getElementById('bank-selection');
+const account = document.getElementById('account');
+const bank = document.getElementById('bank');
 const saveInvoiceButton = document.getElementById('save-invoice');
 const facturaDate = document.getElementById('factura-date');
+const trabajadoraSelect = document.getElementById('trabajadoras');
 let selectedProducts = [];
 let total = 0;
 
@@ -73,7 +76,7 @@ function loadSelectedProducts() {
 
 // Mostrar la lista de trabajadoras
 async function loadTrabajadoras() {
-    const querySnapshot = await getDocs(collection(db, 'trabajadora'));
+    const querySnapshot = await getDocs(collection(db, 'trabajadoras'));
     trabajadoraDropdown.innerHTML = `<option value="">Seleccione una trabajadora</option>`;
     querySnapshot.forEach((doc) => {
         const trabajadora = doc.data().name;
