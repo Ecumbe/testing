@@ -59,3 +59,4 @@ filterButton.addEventListener('click', () => {
         alert("Por favor, seleccione una fecha.");
     }
 });
+load
