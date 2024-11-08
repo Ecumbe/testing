@@ -1,5 +1,5 @@
 import { db, auth } from './firebaseConfig.js';
-import { collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
+import { collection, getDocs, addDoc } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
 import { signOut } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js';
 
 const productList = document.getElementById('product-list');
@@ -15,14 +15,14 @@ const trabajadorSelect = document.getElementById('trabajadora');
 let selectedProducts = [];
 let total = 0;
 
-// Mostrar productos desde Firebase
+// Cargar productos desde Firebase
 async function loadProducts() {
     const querySnapshot = await getDocs(collection(db, 'productos'));
-    productList.innerHTML = '';
+    productList.innerHTML = '';  // Limpiar las opciones previas
     querySnapshot.forEach((doc) => {
         const product = doc.data();
         const productOption = document.createElement('option');
-        productOption.value = product.name;
+        productOption.value = doc.id;  // Usar el ID del producto como valor
         productOption.textContent = `${product.name} - $${product.price.toFixed(2)}`;
         productList.appendChild(productOption);
     });
@@ -40,7 +40,7 @@ async function loadTrabajadoras() {
     querySnapshot.forEach((doc) => {
         const trabajadora = doc.data();
         const option = document.createElement('option');
-        option.value = trabajadora.name;
+        option.value = doc.id;  // Usar el ID de la trabajadora como valor
         option.textContent = trabajadora.name;
         trabajadorSelect.appendChild(option);
     });
@@ -54,7 +54,7 @@ function updateSelectedProducts() {
         productItem.classList.add('selected-product');
         productItem.innerHTML = `
             <span>${product.name} - $${product.price.toFixed(2)}</span>
-            <button onclick="removeProduct('${product.name}')">Eliminar</button>
+            <button onclick="removeProduct('${product.id}')">Eliminar</button>
         `;
         selectedProductsContainer.appendChild(productItem);
     });
@@ -64,25 +64,32 @@ function updateSelectedProducts() {
 }
 
 // Agregar un producto seleccionado
-function addProductToList() {
-    const selectedProductName = productList.value;
-    if (selectedProductName) {
-        const selectedProduct = {
-            name: selectedProductName,
-            price: parseFloat(productList.options[productList.selectedIndex].dataset.price)
-        };
-        selectedProducts.push(selectedProduct);
-        updateSelectedProducts();
+async function addProductToList() {
+    const selectedProductId = productList.value;
+    if (selectedProductId) {
+        const docRef = await getDocs(collection(db, 'productos'));
+        docRef.forEach(doc => {
+            const product = doc.data();
+            if (doc.id === selectedProductId) {
+                const selectedProduct = {
+                    id: doc.id,
+                    name: product.name,
+                    price: parseFloat(product.price)
+                };
+                selectedProducts.push(selectedProduct);
+                updateSelectedProducts();
+            }
+        });
     }
 }
 
 // Eliminar un producto de la lista
-function removeProduct(productName) {
-    selectedProducts = selectedProducts.filter(product => product.name !== productName);
+function removeProduct(productId) {
+    selectedProducts = selectedProducts.filter(product => product.id !== productId);
     updateSelectedProducts();
 }
 
-// Cambiar la visibilidad de los campos
+// Cambiar la visibilidad de los campos (transferencia)
 paymentMethod.addEventListener('change', () => {
     if (paymentMethod.value === 'transferencia') {
         accountSelection.style.display = 'block';
@@ -122,7 +129,7 @@ saveInvoiceButton.addEventListener('click', async () => {
         selectedProducts = [];
         total = 0;
         updateSelectedProducts();
-        loadProducts();
+        loadProducts();  // Recargar productos
     } catch (error) {
         console.error("Error al guardar la factura:", error);
     }
