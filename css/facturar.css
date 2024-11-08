@@ -1,157 +1,201 @@
 /* css/facturar.css */
-
+/* General */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f3f0ff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
     margin: 0;
-}
-
-.facturacion-container {
-    background-color: #fcdff1;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    padding: 30px;
-    width: 450px;
-    text-align: center;
-    max-height: 90vh;
-    overflow-y: auto;
+    padding: 0;
+    background-color: #f7f7f7;
 }
 
 h2 {
-    color: #834b8f;
-    margin-bottom: 20px;
-    font-size: 1.6em;
-}
-
-.factura-detalles {
+    text-align: center;
     margin-top: 20px;
 }
 
-label {
-    display: block;
-    margin-top: 10px;
-    text-align: left;
-    color: #834b8f;
-    font-size: 0.9em;
+.facturacion-container {
+    width: 90%;
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-#product-list {
+button {
+    font-size: 1em;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+button:active {
+    background-color: #3c8c40;
+}
+
+select, input[type="date"] {
+    padding: 10px;
+    font-size: 1em;
+    width: 100%;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+}
+
+/* Estilo para la selección de productos */
+select#product-select {
+    padding: 10px;
+    width: 100%;
     margin-bottom: 20px;
-    text-align: left;
-    overflow-y: auto;
-    max-height: 200px;
+}
+
+/* Mostrar productos seleccionados */
+#selected-products {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+#selected-products p {
+    margin: 5px 0;
+}
+
+/* Estilo de la lista de productos */
+#product-list {
+    display: flex;
+    flex-direction: column;
 }
 
 .product-item {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
-    padding: 10px;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease;
 }
 
-.product-item:hover {
-    background-color: #f3e1f5;
-}
-
-.product-item label {
-    flex: 1;
-    color: #834b8f;
-    font-size: 1.1em;
-}
-
-.product-item input[type="checkbox"] {
+.product-item input {
     margin-right: 10px;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
 }
 
-/* Total fuera del cuadro principal */
+/* Contenedor de la información de facturación */
+.factura-detalles {
+    margin-top: 20px;
+}
+
 .total-container {
-    background-color: #f3f0ff;
-    border-radius: 10px;
-    padding: 15px;
     font-size: 1.5em;
     font-weight: bold;
-    color: #834b8f;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
-    text-align: center;
 }
 
-/* Métodos de pago, cuenta y fecha en la misma línea */
+.total-container p {
+    margin: 0;
+}
+
+/* Estilo para los formularios de pago */
 .payment-date-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
 }
 
-.payment-date-container div {
-    flex: 1;
+.payment-date-container label {
+    font-weight: bold;
 }
 
-#factura-date {
-    border-radius: 20px 5px 20px 5px; /* Asimétrico */
-}
-
-#payment-method,
-#account,
-#factura-date {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    font-size: 1em;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-}
-
-button {
-    width: 100%;
-    background-color: #834b8f;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1.2em;
-    margin-top: 10px;
-}
-
-button:hover {
-    background-color: #6d3b73;
-}
-
-#account-selection {
+/* Mostrar / ocultar las opciones de cuenta y banco */
+#account-selection, #bank-selection {
     display: none;
 }
 
-/* Diseño para el cuadro de valor total */
+/* Estilo para los botones en la parte inferior */
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+#save-invoice, #revisar-facturas, #back, #logout {
+    width: auto;
+    font-size: 1em;
+    padding: 10px 20px;
+}
+
+#revisar-facturas {
+    background-color: #008CBA;
+}
+
+#revisar-facturas:hover {
+    background-color: #007bb5;
+}
+
+#revisar-facturas:active {
+    background-color: #006994;
+}
+
+/* Estilo para los campos de selección de banco y trabajadora */
+#trabajadora, #bank, #account {
+    margin-top: 10px;
+}
+
+#trabajadora option, #bank option, #account option {
+    font-size: 1em;
+}
+
+/* Estilo para la sección de confirmación de factura */
+.confirmation-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+/* Asegurar que los botones sean iguales en tamaño */
+button {
+    font-size: 14px;
+    padding: 5px 15px;
+    min-width: 120px;
+}
+
+/* Estilo para las fechas */
+input[type="date"] {
+    font-size: 1em;
+}
+
+/* Estilo adicional para el total */
 #total-amount {
-    font-size: 2em;
-    font-weight: bold;
-    padding: 30px;
-    background-color: #f3f0ff;
-    border-radius: 15px;
-    margin-top: 20px;
-    color: #834b8f;
-    text-align: center;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    font-size: 1.8em;
+    color: #e74c3c;
 }
 
-#back, #logout {
-    margin-top: 20px;
-    background-color: #d9534f;
+/* Estilos generales de la página */
+html {
+    font-size: 16px;
 }
 
-#back:hover, #logout:hover {
-    background-color: #c12e2a;
+@media (max-width: 600px) {
+    .payment-date-container {
+        grid-template-columns: 1fr;
+    }
+
+    .button-container {
+        flex-direction: column;
+    }
+
+    button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
 }
