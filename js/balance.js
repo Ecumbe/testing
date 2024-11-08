@@ -53,9 +53,15 @@ async function generateSalesReport() {
             }
 
             trabajadoraEarnings[trabajadoraName].totalSales += data.valor;
-            trabajadoraEarnings[trabajadoraName].earnings = trabajadoraEarnings[trabajadoraName].totalSales * (trabajadoraEarnings[trabajadoraName].percentage / 100);
         }
     }
+
+    // Calcular las ganancias de cada trabajadora
+    Object.keys(trabajadoraEarnings).forEach(trabajadoraName => {
+        const { percentage, totalSales } = trabajadoraEarnings[trabajadoraName];
+        const earnings = totalSales * (percentage / 100);
+        trabajadoraEarnings[trabajadoraName].earnings = earnings;
+    });
 
     // Crear contenido para el PDF con la ganancia por trabajadora
     const content = [
@@ -83,9 +89,7 @@ async function generateSalesReport() {
     // Añadir ganancias por trabajadora al contenido del PDF
     Object.keys(trabajadoraEarnings).forEach(trabajadoraName => {
         const { percentage, earnings } = trabajadoraEarnings[trabajadoraName];
-        if (percentage > 0 && earnings > 0) {
-            content.push({ text: `${trabajadoraName} gana el ${percentage}% = $${earnings.toFixed(2)}`, margin: [0, 5, 0, 0] });
-        }
+        content.push({ text: `${trabajadoraName} (Porcentaje: ${percentage}%) gana: $${earnings.toFixed(2)}`, margin: [0, 5, 0, 0] });
     });
 
     const docDefinition = { content };
