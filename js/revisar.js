@@ -1,5 +1,5 @@
 import { db, auth } from './firebaseConfig.js';
-import { collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
+import { collection, getDocs, query, where, deleteDoc, doc } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
 import { signOut } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js';
 
 const filterDateInput = document.getElementById('filter-date');
@@ -59,4 +59,17 @@ filterButton.addEventListener('click', () => {
         alert("Por favor, seleccione una fecha.");
     }
 });
-load
+
+// Botón Volver: Regresar a facturas.html
+document.getElementById('back').addEventListener('click', function() {
+    window.location.href = 'facturas.html';  // Cambiar a la página de facturas
+});
+
+// Botón Cerrar sesión: Redirigir a la página de inicio de sesión
+document.getElementById('logout').addEventListener('click', function() {
+    signOut(auth).then(() => {
+        window.location.href = 'login.html';  // Redirigir a la página de login
+    }).catch((error) => {
+        console.error("Error al cerrar sesión:", error);
+    });
+});
