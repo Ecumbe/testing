@@ -16,8 +16,9 @@ const logoutButton = document.getElementById('logout');
 async function getTrabajadoraPercentage(trabajadoraName) {
     const q = query(collection(db, 'trabajadoras'), where('nombre', '==', trabajadoraName));
     const querySnapshot = await getDocs(q);
-    const trabajadoraData = querySnapshot.docs[0]?.data();
-    return trabajadoraData ? trabajadoraData.percentage : 0;
+    if (querySnapshot.empty) return 0; // Retorna 0 si no encuentra la trabajadora
+    const trabajadoraData = querySnapshot.docs[0].data();
+    return trabajadoraData.percentage;
 }
 
 // Función para generar reporte de ventas en PDF
@@ -44,14 +45,16 @@ async function generateSalesReport() {
         reportData.push(data);
         totalValue += data.valor;
 
-        const trabajadoraName = data.trabajadora || '';
-        if (!trabajadoraEarnings[trabajadoraName]) {
-            trabajadoraEarnings[trabajadoraName] = { totalSales: 0, percentage: 0, earnings: 0 };
-            trabajadoraEarnings[trabajadoraName].percentage = await getTrabajadoraPercentage(trabajadoraName);
-        }
+        const trabajadoraName = data.trabajadora;
+        if (trabajadoraName) {
+            if (!trabajadoraEarnings[trabajadoraName]) {
+                const percentage = await getTrabajadoraPercentage(trabajadoraName);
+                trabajadoraEarnings[trabajadoraName] = { totalSales: 0, percentage, earnings: 0 };
+            }
 
-        trabajadoraEarnings[trabajadoraName].totalSales += data.valor;
-        trabajadoraEarnings[trabajadoraName].earnings = trabajadoraEarnings[trabajadoraName].totalSales * (trabajadoraEarnings[trabajadoraName].percentage / 100);
+            trabajadoraEarnings[trabajadoraName].totalSales += data.valor;
+            trabajadoraEarnings[trabajadoraName].earnings = trabajadoraEarnings[trabajadoraName].totalSales * (trabajadoraEarnings[trabajadoraName].percentage / 100);
+        }
     }
 
     // Crear contenido para el PDF con la ganancia por trabajadora
@@ -77,7 +80,7 @@ async function generateSalesReport() {
         { text: 'Ganancias por Trabajadora:', bold: true }
     ];
 
-    // Añadir ganancias por trabajadora al contenido del PDF solo si tienen un porcentaje y ganancia mayor a 0
+    // Añadir ganancias por trabajadora al contenido del PDF
     Object.keys(trabajadoraEarnings).forEach(trabajadoraName => {
         const { percentage, earnings } = trabajadoraEarnings[trabajadoraName];
         if (percentage > 0 && earnings > 0) {
