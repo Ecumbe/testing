@@ -3,82 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facturar</title>
-    <link rel="stylesheet" href="css/facturar.css">
-    <link rel="stylesheet" href="custom-cursor.css">
+    <title>Facturación</title>
+    <link rel="stylesheet" href="facturar.css">
 </head>
 <body>
-    <div class="facturacion-container">
-        <h2>Facturación</h2>
+    <div class="container">
+        <header>
+            <h1>Facturación</h1>
+        </header>
         
+        <!-- Fecha de la factura -->
+        <label for="factura-date">Fecha:</label>
+        <input type="date" id="factura-date" required>
+
         <!-- Selección de productos -->
-        <div>
-            <label for="product-dropdown">Seleccionar Producto:</label>
-            <select id="product-dropdown"></select>
+        <label for="product-select">Seleccionar producto:</label>
+        <select id="product-select">
+            <option value="">-- Seleccionar producto --</option>
+        </select>
+        
+        <!-- Productos seleccionados -->
+        <div id="selected-products" class="selected-products">
+            <!-- Los productos seleccionados aparecerán aquí -->
         </div>
-        
-        <!-- Listado de productos seleccionados -->
-        <div id="product-list"></div>
-        
-        <!-- Detalles de facturación -->
-        <div class="factura-detalles">
-            <div class="total-container">
-                <p>Total: $<span id="total-amount">0.00</span></p>
-            </div>
-            
-            <div class="payment-date-container">
-                <div>
-                    <label for="payment-method">Método de Pago:</label>
-                    <select id="payment-method">
-                        <option value="efectivo">Efectivo</option>
-                        <option value="transferencia">Transferencia</option>
-                    </select>
-                </div>
-                
-                <div id="account-selection" style="display: none;">
-                    <label for="account">Cuenta:</label>
-                    <select id="account">
-                        <option value="Arianna">Arianna</option>
-                        <option value="Juanita">Juanita</option>
-                    </select>
-                </div>
 
-                <div id="bank-selection" style="display: none;">
-                    <label for="bank">Banco:</label>
-                    <select id="bank">
-                        <option value="Pichincha">Pichincha</option>
-                        <option value="Pacífico">Pacífico</option>
-                        <option value="Guayaquil">Guayaquil</option>
-                        <option value="Bolivariano">Bolivariano</option>
-                        <option value="Produbanco">Produbanco</option>
-                    </select>
-                </div>
-                
-                <div>
-                    <label for="factura-date">Fecha:</label>
-                    <input type="date" id="factura-date" required>
-                </div>
-            </div>
+        <!-- Monto total -->
+        <div class="total-container">
+            <span>Total:</span>
+            <span id="total-amount">0.00</span>
+        </div>
 
-            <div>
-                <label for="trabajadora">Trabajadora:</label>
-                <select id="trabajadora"></select>
-            </div>
+        <!-- Método de pago -->
+        <label for="payment-method">Método de Pago:</label>
+        <select id="payment-method">
+            <option value="efectivo">Efectivo</option>
+            <option value="transferencia">Transferencia</option>
+        </select>
 
-            <div class="button-container">
-                <button id="save-invoice">Guardar Factura</button>
-                <button id="view-invoices">Revisar Facturas</button>
-            </div>
-            
-            <div class="button-container">
-                <button id="back">Atrás</button>
-                <button id="logout">Cerrar Sesión</button>
-            </div>
+        <!-- Selección de cuenta y banco (si se selecciona transferencia) -->
+        <div id="account-selection" class="hidden">
+            <label for="account">Cuenta:</label>
+            <input type="text" id="account" placeholder="Nombre del titular de cuenta">
+        </div>
+
+        <div id="bank-selection" class="hidden">
+            <label for="bank">Banco:</label>
+            <select id="bank">
+                <option value="pichincha">Pichincha</option>
+                <option value="pacifico">Pacífico</option>
+                <option value="guayaquil">Guayaquil</option>
+                <option value="bolivariano">Bolivariano</option>
+                <option value="produbanco">Produbanco</option>
+            </select>
+        </div>
+
+        <!-- Selección de trabajadora -->
+        <label for="trabajadora">Trabajadora:</label>
+        <select id="trabajadora">
+            <option value="">-- Seleccionar trabajadora --</option>
+        </select>
+
+        <!-- Botones -->
+        <div class="button-container">
+            <button id="back">Atrás</button>
+            <button id="logout">Cerrar Sesión</button>
+            <button id="review-invoices">Revisar Facturas</button>
+            <button id="save-invoice">Guardar Factura</button>
         </div>
     </div>
 
-    <script src="js/firebaseConfig.js" type="module"></script>
-    <script src="js/facturar.js" type="module"></script>
-    <script src="custom-cursor.js" defer></script>
+    <script src="js/facturar.js"></script>
 </body>
 </html>
