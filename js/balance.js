@@ -1,5 +1,5 @@
 import { db, auth } from './firebaseConfig.js';
-import { collection, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
+import { collection, getDocs, query, where, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
 import { signOut } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js';
 
 // Referencias a elementos
@@ -12,6 +12,15 @@ const endDateAppointments = document.getElementById('end-date-appointments');
 const generateAppointmentsReportButton = document.getElementById('generate-appointments-report');
 const backButton = document.getElementById('back');
 const logoutButton = document.getElementById('logout');
+
+// Función para obtener el porcentaje de una trabajadora desde la base de datos
+async function getWorkerPercentage(trabajadora) {
+    const workerDoc = await getDoc(doc(db, 'trabajadoras', trabajadora));
+    if (workerDoc.exists()) {
+        return workerDoc.data().percentage || 0;
+    }
+    return 0;
+}
 
 // Función para generar reporte de ventas en PDF
 async function generateSalesReport() {
@@ -32,11 +41,25 @@ async function generateSalesReport() {
     const reportData = [];
     let totalValue = 0;
 
-    querySnapshot.forEach((doc) => {
+    for (const doc of querySnapshot.docs) {
         const data = doc.data();
-        reportData.push(data);
+        
+        // Obtener porcentaje de ganancia de la trabajadora
+        const workerPercentage = await getWorkerPercentage(data.trabajadora);
+        const workerEarnings = data.valor * (workerPercentage / 100);
+
+        reportData.push({
+            fecha: data.fecha,
+            productos: data.productos || data['que se hara'],
+            valor: data.valor,
+            t_pago: data.t_pago,
+            cuenta: data.cuenta,
+            banco: data.banco,
+            trabajadora: data.trabajadora,
+            workerEarnings: workerEarnings.toFixed(2),
+        });
         totalValue += data.valor;
-    });
+    }
 
     const employeeEarnings = totalValue * (percentage / 100);
 
@@ -47,13 +70,16 @@ async function generateSalesReport() {
             {
                 table: {
                     body: [
-                        ['Fecha', 'Productos', 'Valor', 'Tipo de Pago', 'Cuenta'].map(text => ({ text, bold: true })),
+                        ['Fecha', 'Productos', 'Valor', 'Tipo de Pago', 'Cuenta', 'Banco', 'Trabajadora', 'Ganancia Trabajadora'].map(text => ({ text, bold: true })),
                         ...reportData.map(item => [
                             item.fecha,
-                            item.productos || item['que se hara'],
+                            item.productos,
                             item.valor || '',
                             item.t_pago || '',
-                            item.cuenta || ''
+                            item.cuenta || '',
+                            item.banco || '',
+                            item.trabajadora || '',
+                            `$${item.workerEarnings}`
                         ])
                     ]
                 }
@@ -64,68 +90,6 @@ async function generateSalesReport() {
     };
 
     pdfMake.createPdf(docDefinition).download('Reporte_de_Ventas.pdf');
-}
-
-// Función para generar reporte de citas en PDF
-async function generateAppointmentsReport() {
-    if (!startDateAppointments.value || !endDateAppointments.value) {
-        alert('Seleccione ambas fechas.');
-        return;
-    }
-
-    const q = query(
-        collection(db, 'citas'),
-        where('fecha', '>=', startDateAppointments.value),
-        where('fecha', '<=', endDateAppointments.value)
-    );
-
-    const querySnapshot = await getDocs(q);
-    const reportData = [];
-
-    querySnapshot.forEach((doc) => {
-        reportData.push(doc.data());
-    });
-    if (reportData.length === 0) {
-        alert('No se encontraron citas en el rango de fechas seleccionado.');
-        return;
-    }
-
-    // Definición del documento PDF
-    const docDefinition = {
-        content: [
-            {
-                text: 'Reporte de Citas Agendadas',
-                fontSize: 16,
-                bold: true,
-                alignment: 'center',
-                margin: [0, 0, 0, 20]
-            },
-            {
-                table: {
-                    headerRows: 1,
-                    widths: ['*', '*', '*', '*', '*'],
-                    body: [
-                        [
-                            { text: 'Fecha', bold: true },
-                            { text: 'Nombre', bold: true },
-                            { text: 'Descripción', bold: true },
-                            { text: 'Hora', bold: true },
-                            { text: 'Asistió', bold: true }
-                        ],
-                        ...reportData.map(item => [
-                            item.fecha,
-                            item.nombre,
-                            item.descripcion,
-                            item.hora,
-                            item.asistio ? 'Sí' : 'No'
-                        ])
-                    ]
-                }
-            }
-        ]
-    };
-
-    pdfMake.createPdf(docDefinition).download('Reporte_de_Citas.pdf');
 }
 
 // Eventos de los botones
