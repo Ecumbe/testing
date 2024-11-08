@@ -4,117 +4,76 @@ import { db, auth } from './firebaseConfig.js';
 import { collection, addDoc, getDocs } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
 import { signOut } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js';
 
-const productDropdown = document.getElementById('product-dropdown');
-const selectedProductsDiv = document.getElementById('selected-products');
+const productList = document.getElementById('product-list');
 const totalAmount = document.getElementById('total-amount');
 const paymentMethod = document.getElementById('payment-method');
 const accountSelection = document.getElementById('account-selection');
-const bankSelection = document.getElementById('bank-selection');
 const account = document.getElementById('account');
-const bank = document.getElementById('bank');
-const trabajadoraDropdown = document.getElementById('trabajadora');
 const saveInvoiceButton = document.getElementById('save-invoice');
 const facturaDate = document.getElementById('factura-date');
 let selectedProducts = [];
 let total = 0;
 
-// Mostrar productos desde Firebase en la lista desplegable
+// Mostrar productos desde Firebase
 async function loadProducts() {
     const querySnapshot = await getDocs(collection(db, 'productos'));
-    productDropdown.innerHTML = '<option value="">Selecciona un producto</option>';
+    productList.innerHTML = '';
     querySnapshot.forEach((doc) => {
         const product = doc.data();
-        const option = document.createElement('option');
-        option.value = JSON.stringify({ name: product.name, price: product.price });
-        option.textContent = `${product.name} - $${product.price.toFixed(2)}`;
-        productDropdown.appendChild(option);
+        const productItem = document.createElement('div');
+        productItem.classList.add('product-item');
+        
+        productItem.innerHTML = `
+            <input type="checkbox" data-name="${product.name}" data-price="${product.price}">
+            <label>${product.name} - $${product.price.toFixed(2)}</label>
+        `;
+        
+        productList.appendChild(productItem);
+    });
+
+    document.querySelectorAll('.product-item input').forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+            const price = parseFloat(e.target.getAttribute('data-price'));
+            if (e.target.checked) {
+                selectedProducts.push(e.target.getAttribute('data-name'));
+                total += price;
+            } else {
+                selectedProducts = selectedProducts.filter(name => name !== e.target.getAttribute('data-name'));
+                total -= price;
+            }
+            totalAmount.textContent = total.toFixed(2);
+        });
     });
 }
 
-// Mostrar trabajadoras desde Firebase en el menú desplegable
-async function loadTrabajadoras() {
-    const querySnapshot = await getDocs(collection(db, 'trabajadoras'));
-    trabajadoraDropdown.innerHTML = '<option value="">Selecciona una trabajadora</option>';
-    querySnapshot.forEach((doc) => {
-        const trabajadora = doc.data();
-        const option = document.createElement('option');
-        option.value = trabajadora.name;
-        option.textContent = trabajadora.name;
-        trabajadoraDropdown.appendChild(option);
-    });
-}
-
-// Manejar selección de producto
-productDropdown.addEventListener('change', () => {
-    if (productDropdown.value) {
-        const product = JSON.parse(productDropdown.value);
-        addProduct(product.name, product.price);
-        productDropdown.value = "";  // Restablecer selección
-    }
-});
-
-// Agregar producto a la lista de productos seleccionados
-function addProduct(name, price) {
-    const productItem = document.createElement('div');
-    productItem.classList.add('product-item');
-    productItem.innerHTML = `
-        <span>${name} - $${price.toFixed(2)}</span>
-        <button class="remove-product">X</button>
-    `;
-    selectedProductsDiv.appendChild(productItem);
-
-    // Añadir evento para eliminar el producto
-    productItem.querySelector('.remove-product').addEventListener('click', () => {
-        selectedProducts = selectedProducts.filter(p => !(p.name === name && p.price === price));
-        total -= price;
-        totalAmount.textContent = total.toFixed(2);
-        productItem.remove();
-    });
-
-    selectedProducts.push({ name, price });
-    total += price;
-    totalAmount.textContent = total.toFixed(2);
-}
-
-// Cambiar la visibilidad de la selección de cuenta y banco
+// Cambiar la visibilidad de la selección de cuenta
 paymentMethod.addEventListener('change', () => {
-    const isTransfer = paymentMethod.value === 'transferencia';
-    accountSelection.style.display = isTransfer ? 'block' : 'none';
-    bankSelection.style.display = isTransfer ? 'block' : 'none';
+    accountSelection.style.display = paymentMethod.value === 'transferencia' ? 'block' : 'none';
 });
 
 // Guardar factura en Firebase
 saveInvoiceButton.addEventListener('click', async () => {
-    if (!facturaDate.value || selectedProducts.length === 0 || !trabajadoraDropdown.value) {
-        alert("Por favor, complete todos los campos requeridos.");
+    if (!facturaDate.value || selectedProducts.length === 0) {
+        alert("Por favor, complete la fecha y seleccione al menos un producto.");
         return;
     }
 
-    if (!confirm("¿Está seguro de que desea guardar esta factura?")) return;
-
     const t_pago = paymentMethod.value;
     const cuenta = t_pago === 'transferencia' ? account.value : '';
-    const banco = t_pago === 'transferencia' ? bank.value : '';
-    const trabajadora = trabajadoraDropdown.value;
 
     try {
         await addDoc(collection(db, 'ventas'), {
             fecha: facturaDate.value,
-            productos: selectedProducts.map(p => `${p.name} - $${p.price.toFixed(2)}`).join(', '),
+            productos: selectedProducts.join(', '),
             t_pago,
             cuenta,
-            banco,
-            trabajadora,
             valor: total
         });
         alert("Factura guardada exitosamente.");
-        
-        // Restablecer valores después de guardar
         selectedProducts = [];
         total = 0;
         totalAmount.textContent = '0.00';
-        selectedProductsDiv.innerHTML = '';
-        facturaDate.value = '';
+        loadProducts();
     } catch (error) {
         console.error("Error al guardar la factura:", error);
     }
@@ -134,11 +93,5 @@ document.getElementById('back').addEventListener('click', () => {
     window.location.href = "menu.html";
 });
 
-// Ir a la página de revisión de facturas
-document.getElementById('review-invoices').addEventListener('click', () => {
-    window.location.href = "revisar.html";
-});
-
-// Cargar productos y trabajadoras al iniciar
+// Cargar productos al iniciar
 loadProducts();
-loadTrabajadoras();
